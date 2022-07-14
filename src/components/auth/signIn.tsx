@@ -2,10 +2,12 @@ import {
   Box,
   Button,
   Container,
+  Flex,
   FormLabel,
   Heading,
   Input,
-  notificationService
+  notificationService,
+  Text
 } from '@hope-ui/solid';
 import { Component, createSignal } from 'solid-js';
 import { createSupabaseAuth } from 'solid-supabase';
@@ -40,33 +42,43 @@ export const SignIn: Component = () => {
     }
   };
   return (
-    <Container display='grid' placeItems={'center'} minHeight='100vh'>
-      <Box>
-        <Heading level='1' size='3xl' textAlign={'center'} marginBottom='20px'>
-          Sign in using Magic Link
-        </Heading>
-        <form onSubmit={handleLogin}>
-          <FormLabel for='email'>Email address</FormLabel>
-          <Input
-            id='email'
-            placeholder='johndoe@gmail.com'
-            type='email'
-            value={email()}
-            oninput={e => {
-              setEmail(e.target.value);
-            }}
-          />
-          <Button
-            textAlign={'center'}
-            type='submit'
-            colorScheme='primary'
-            marginTop={'20px'}
-            loading={isLoading()}
-          >
-            Sign in
-          </Button>
-        </form>
-      </Box>
-    </Container>
+    <Box>
+      <Container display='grid' placeItems={'center'} minHeight='100vh'>
+        <Box>
+          <Box textAlign={'center'} mb='$4'>
+            <Heading level='6' size='5xl' marginBottom='20px'>
+              Welcome
+            </Heading>
+            <Text size='base'>Easily sign in with using a magic link.</Text>
+          </Box>
+          <form onSubmit={handleLogin}>
+            <Flex alignItems={'center'}>
+              <Box alignItems={'center'}>
+                <FormLabel for='email'>Email address</FormLabel>
+                <Input
+                  id='email'
+                  placeholder='johndoe@gmail.com'
+                  type='email'
+                  value={email()}
+                  oninput={e => {
+                    setEmail(e.target.value);
+                  }}
+                />
+                <Button
+                  width={'$full'}
+                  textAlign={'center'}
+                  type='submit'
+                  colorScheme='primary'
+                  marginTop={'20px'}
+                  loading={isLoading()}
+                >
+                  Sign in
+                </Button>
+              </Box>
+            </Flex>
+          </form>
+        </Box>
+      </Container>
+    </Box>
   );
 };

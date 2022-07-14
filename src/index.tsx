@@ -1,9 +1,10 @@
-/* @refresh reload */
 import { render } from 'solid-js/web';
 import { createClient } from '@supabase/supabase-js';
 import { SupabaseProvider } from 'solid-supabase';
 import App from './App';
 import { HopeProvider, NotificationsProvider } from '@hope-ui/solid';
+import { Router } from 'solid-app-router';
+import { StoreProvider } from './components/auth';
 
 const supabase = createClient(
   'https://cwocwsdipdkszcmwhtvj.supabase.co',
@@ -15,7 +16,11 @@ render(
     <SupabaseProvider client={supabase}>
       <HopeProvider>
         <NotificationsProvider>
-          <App />
+          <Router>
+            <StoreProvider>
+              <App />
+            </StoreProvider>
+          </Router>
         </NotificationsProvider>
       </HopeProvider>
     </SupabaseProvider>

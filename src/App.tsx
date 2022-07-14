@@ -1,20 +1,18 @@
-import { Container } from '@hope-ui/solid';
-import { Component, createEffect, createSignal } from 'solid-js';
-import { createOnAuthStateChange } from 'solid-supabase';
-
+import { Route, Routes } from 'solid-app-router';
+import { Component } from 'solid-js';
 import { SignIn } from './components/auth';
 
-const App: Component = () => {
-  const [session, setSession] = createSignal(null);
+import { Home } from './components/views';
+import { useSupabaseListener } from './hooks';
 
-  createOnAuthStateChange((event, session) => {
-    console.log(event, session);
-    setSession(session);
-  });
+const App: Component = () => {
+  useSupabaseListener();
+
   return (
-    <Container display='grid' placeItems={'center'} minHeight='100vh'>
-      {!session ? <SignIn /> : <h1>Hooooray!</h1>}
-    </Container>
+    <Routes>
+      <Route path='/' component={Home} />
+      <Route path='/login' component={SignIn} />
+    </Routes>
   );
 };
 
