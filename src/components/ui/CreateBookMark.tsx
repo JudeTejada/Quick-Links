@@ -2,6 +2,7 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Input,
   Popover,
@@ -14,59 +15,64 @@ import {
 import { createEffect, createSignal, Show } from 'solid-js';
 import { isUrl } from '../../util';
 
-function CreateBookmark() {
-  const [categoryText, setCategoryText] = createSignal('');
+function CreateBookmark(props) {
+  const [url, setUrl] = createSignal('');
   const [invalidUrl, setInvalidUrl] = createSignal(false);
   const [pressedEnter, setPressendEnter] = createSignal(false);
 
-  console.log(invalidUrl, 'invalidUrl');
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (!categoryText()) return;
+    if (!url()) return;
 
     if (e.key === 'Enter') setPressendEnter(true);
   };
 
   const handleInput = (e: InputEvent) => {
-    setCategoryText(e.target.value!);
+    setUrl(e.target.value!);
     setInvalidUrl(false);
   };
 
   createEffect(() => {
-    const isUrlValid = isUrl(categoryText());
+    const isUrlValid = isUrl(url());
 
     if (pressedEnter()) {
-      if (!isUrlValid) setInvalidUrl(true);
+      if (!isUrlValid) return setInvalidUrl(true);
 
       setPressendEnter(false);
-      alert('success');
+
+      props.onAddNewLink(url());
     }
   });
 
   return (
     <>
       <Popover placement='top-start' initialFocus='#category'>
-        <PopoverTrigger as={Button} variant='subtle' colorScheme='neutral'>
-          Add new category
+        <PopoverTrigger
+          as={Button}
+          variant='subtle'
+          colorScheme='neutral'
+          size='sm'
+        >
+          New+
         </PopoverTrigger>
         <PopoverContent>
           <PopoverArrow />
           <PopoverCloseButton />
           <PopoverBody>
             <FormControl>
-              <FormLabel for='email'>Category</FormLabel>
+              <FormLabel for='email'></FormLabel>
 
               <Input
                 placeholder='https://www.google.com/'
                 id='category'
                 type='text'
-                value={categoryText()}
+                value={url()}
                 onInput={handleInput}
                 onKeyDown={handleKeyDown}
                 invalid={invalidUrl()}
               />
 
               <Show when={invalidUrl()} fallback={null}>
-                <FormErrorMessage>Email is required.</FormErrorMessage>
+                <FormHelperText color={'$danger9'}>Invalid url</FormHelperText>
               </Show>
             </FormControl>
           </PopoverBody>

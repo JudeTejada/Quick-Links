@@ -5,3 +5,7 @@ export const isUrl = (string: string): boolean => {
     return false;
   }
 };
+
+export function removeHttp(url: string) {
+  return url.replace(/^https?:\/\//, '');
+}

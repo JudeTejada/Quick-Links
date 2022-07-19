@@ -1,13 +1,19 @@
 type Bookmark = {
   url: string;
-  image: string;
+  id: string;
 };
 
-type Categories = {
+type BookmarkGroup = {
   title: string;
+  id: string;
   bookmarks: Bookmark[];
 };
 
-type Bookmarks = Categories[];
+type CategoriesBookmark = BookmarkGroup[];
 
-export type { Bookmark, Categories, Bookmarks };
+type AddNewBookmark = {
+  id: string;
+  url: string;
+};
+
+export type { Bookmark, BookmarkGroup, CategoriesBookmark, AddNewBookmark };

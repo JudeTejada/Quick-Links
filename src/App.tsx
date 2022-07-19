@@ -12,7 +12,6 @@ const App: Component = () => {
   const session = useAuth();
 
   const [isLoading, setIsLoading] = createSignal(false);
-  console.log('🚀 ~ file: App.tsx ~ line 15 ~ isLoading', isLoading());
 
   createRenderEffect(() => {
     const url = new URL(window.location.href);
