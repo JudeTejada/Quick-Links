@@ -1,6 +1,7 @@
 import { type Session } from '@supabase/supabase-js';
 import { useNavigate } from 'solid-app-router';
 import {
+  Accessor,
   createContext,
   createEffect,
   createSignal,
@@ -9,40 +10,34 @@ import {
 } from 'solid-js';
 import { createOnAuthStateChange, createSupabaseAuth } from 'solid-supabase';
 
-const StoreContext = createContext([{ session: null }, { logout: () => {} }]);
+const StoreContext = createContext<Accessor<Session | null>>();
 
 export const useAuth = () => useContext(StoreContext)!;
 
 export const StoreProvider: ParentComponent = props => {
   const [session, setSession] = createSignal<Session | null>(null);
-  const navigate = useNavigate();
 
   const auth = createSupabaseAuth();
-
-  createOnAuthStateChange((event, session) => {
-    {
-      session ? setSession(session) : setSession(null);
-    }
-  });
+  const navigate = useNavigate();
 
   createEffect(() => {
-    session() &&   navigate('/', { replace: true });
+    setSession(auth.session());
   });
 
-  const logout = () => {
-    auth.signOut();
-    setSession(null);
-    navigate('/login', { replace: true });
-  };
-
-  const user = [
-    session,
-    {
-      logout
+  createOnAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+      setSession(session);
+      navigate('/', { replace: true });
     }
-  ];
+    if (event === 'SIGNED_OUT') {
+      setSession(null);
+      navigate('/login', { replace: true });
+    }
+  });
 
   return (
-    <StoreContext.Provider value={user}>{props.children}</StoreContext.Provider>
+    <StoreContext.Provider value={session}>
+      {props.children}
+    </StoreContext.Provider>
   );
 };
