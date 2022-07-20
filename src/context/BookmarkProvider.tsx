@@ -18,6 +18,8 @@ const BookmarkContext = createContext<BookmarkProps | undefined>([
 
 export const useBookmark = () => useContext(BookmarkContext)!;
 
+
+
 export const BookmarkProvider: ParentComponent = props => {
   const [categories, setCategories] = createStore<CategoriesBookmark>([
     {
@@ -46,8 +48,16 @@ export const BookmarkProvider: ParentComponent = props => {
   };
 
   const addNewBookmark = ({ url, id }: AddNewBookmark) => {
-    // setCategories([...categories, bookmarkList]);
-    // console.log(bookmarkList, 'bookmarkList');
+    setCategories(state => [
+      ...state.map(categories =>
+        categories.id === id
+          ? {
+              ...categories,
+              bookmarks: [...categories.bookmarks, { id: uuidv4(), url }]
+            }
+          : categories
+      )
+    ]);
   };
 
   const values = [categories, { addNewCategory, addNewBookmark }];

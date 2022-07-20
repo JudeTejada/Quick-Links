@@ -16,7 +16,6 @@ function BookmarksList(props: BookmarksListProps) {
   const [, { addNewBookmark }] = useBookmark();
 
   const handleNewLink = (url: string) => {
-    console.log(props.id, 'props.id');
     addNewBookmark({ url, id: props.id });
   };
 
