@@ -12,7 +12,7 @@ type BookmarkGroup = {
 type CategoriesBookmark = BookmarkGroup[];
 
 type AddNewBookmark = {
-  id: string;
+  categoryId: string;
   url: string;
 };
 

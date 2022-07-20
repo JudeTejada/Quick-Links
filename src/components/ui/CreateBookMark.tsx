@@ -1,7 +1,6 @@
 import {
   Button,
   FormControl,
-  FormErrorMessage,
   FormHelperText,
   FormLabel,
   Input,
@@ -15,7 +14,7 @@ import {
 import { createEffect, createSignal, Show } from 'solid-js';
 import { isUrl } from '../../util';
 
-function CreateBookmark(props) {
+function CreateBookmark(props: { onAddNewLink: (value: string) => void }) {
   const [url, setUrl] = createSignal('');
   const [invalidUrl, setInvalidUrl] = createSignal(false);
   const [pressedEnter, setPressendEnter] = createSignal(false);
@@ -26,8 +25,9 @@ function CreateBookmark(props) {
     if (e.key === 'Enter') setPressendEnter(true);
   };
 
-  const handleInput = (e: InputEvent) => {
-    setUrl(e.target.value!);
+  const handleInput = (event: InputEvent) => {
+    const element = event.target as HTMLInputElement;
+    setUrl(element.value);
     setInvalidUrl(false);
   };
 

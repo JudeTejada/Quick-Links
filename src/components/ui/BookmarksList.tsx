@@ -16,7 +16,7 @@ function BookmarksList(props: BookmarksListProps) {
   const [, { addNewBookmark }] = useBookmark();
 
   const handleNewLink = (url: string) => {
-    addNewBookmark({ url, id: props.id });
+    addNewBookmark({ url, categoryId: props.id });
   };
 
   return (
@@ -27,6 +27,7 @@ function BookmarksList(props: BookmarksListProps) {
             <ListItem>
               <Link href={bookmark.url}>
                 <Image
+                  borderRadius={'$full'}
                   boxSize='24px'
                   src={`https://icon.horse/icon/${removeHttp(bookmark.url)}`}
                   alt={bookmark.url}

@@ -24,8 +24,9 @@ function CreateNewCategory() {
     if (e.key === 'Enter') addNewCategory(categoryText());
   };
 
-  const handleInput = (e: InputEvent) => {
-    setCategoryText(e.target.value!);
+  const handleInput = (event: InputEvent) => {
+    const element = event.target as HTMLInputElement;
+    setCategoryText(element.value);
   };
 
   return (
