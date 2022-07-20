@@ -13,24 +13,24 @@ const App: Component = () => {
 
   const [isLoading, setIsLoading] = createSignal(false);
 
-  createRenderEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.hash.startsWith('#access_token')) return setIsLoading(true);
-    setIsLoading(false);
-  });
+  // createRenderEffect(() => {
+  //   const url = new URL(window.location.href);
+  //   if (url.hash.startsWith('#access_token')) return setIsLoading(true);
+  //   setIsLoading(false);
+  // });
 
-  if (isLoading() && !session())
-    return (
-      <Box minHeight={'100vh'} display='grid' placeItems={'center'}>
-        <Spinner
-          thickness='4px'
-          speed='0.65s'
-          emptyColor='$neutral4'
-          color='$info10'
-          size='xl'
-        />
-      </Box>
-    );
+  // if (isLoading() && !session())
+  //   return (
+  //     <Box minHeight={'100vh'} display='grid' placeItems={'center'}>
+  //       <Spinner
+  //         thickness='4px'
+  //         speed='0.65s'
+  //         emptyColor='$neutral4'
+  //         color='$info10'
+  //         size='xl'
+  //       />
+  //     </Box>
+  //   );
 
   return (
     <Routes>
