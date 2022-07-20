@@ -26,7 +26,7 @@ const BookmarkContext = createContext<BookmarkProps | undefined>([
 export const useBookmark = () => useContext(BookmarkContext)!;
 
 export const BookmarkProvider: ParentComponent = props => {
-  const from = createSupabaseFrom(); // from('posts').select('*')
+  const from = createSupabaseFrom(); 
 
   createEffect(async () => {
     let { data: Bookmark, error } = await supabase
