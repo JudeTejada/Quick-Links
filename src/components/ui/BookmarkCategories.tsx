@@ -1,6 +1,6 @@
 import { Heading, ListItem, UnorderedList } from '@hope-ui/solid';
-import { For } from 'solid-js';
-import { useBookmark } from '../../context/BookmarkProvider';
+import { createEffect, For } from 'solid-js';
+import { categoriesStore, useBookmark } from '../../context/BookmarkProvider';
 
 import { BookmarksList } from './BookmarksList';
 import { CreateNewCategory } from './CreateNewCategory';

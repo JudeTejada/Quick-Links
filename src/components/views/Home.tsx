@@ -17,30 +17,30 @@ const Home: Component = () => {
     auth.signOut();
   };
   return (
-    <BookmarkProvider>
-      <Container p={'$20'} maxW='$5xl'>
-        <Flex alignItems={'center'}>
-          <Box>
-            <Heading size={'3xl'} mb='$1'>
-              Minimal solid marks
-            </Heading>
-            <Heading size='base' color='$blackAlpha11'>
-              {session()?.user?.email}
-            </Heading>
-          </Box>
-          <Spacer />
-          <Button onClick={handleLogout}>logout</Button>
-        </Flex>
-        <Box
-          mt='$10'
-          display='flex'
-          flexDirection={'column'}
-          alignItems='flex-start'
-        >
-          <BookmarkCategories />
+    <Container p={'$20'} maxW='$5xl'>
+      <Flex alignItems={'center'}>
+        <Box>
+          <Heading size={'3xl'} mb='$1'>
+            Minimal solid marks
+          </Heading>
+          <Heading size='base' color='$blackAlpha11'>
+            {session()?.user?.email}
+          </Heading>
         </Box>
-      </Container>
-    </BookmarkProvider>
+        <Spacer />
+        <Button onClick={handleLogout}>logout</Button>
+      </Flex>
+      <Box
+        mt='$10'
+        display='flex'
+        flexDirection={'column'}
+        alignItems='flex-start'
+      >
+        <BookmarkProvider>
+          <BookmarkCategories />
+        </BookmarkProvider>
+      </Box>
+    </Container>
   );
 };
 

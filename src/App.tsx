@@ -1,6 +1,11 @@
 import { Box, Spinner } from '@hope-ui/solid';
-import { Route, Routes } from 'solid-app-router';
-import { Component, createRenderEffect, createSignal } from 'solid-js';
+import { Route, Routes, useLocation } from 'solid-app-router';
+import {
+  Component,
+  createEffect,
+  createRenderEffect,
+  createSignal
+} from 'solid-js';
 
 import { SignIn, useAuth } from './components/auth';
 
@@ -12,25 +17,12 @@ const App: Component = () => {
   const session = useAuth();
 
   const [isLoading, setIsLoading] = createSignal(false);
+  const location = useLocation();
 
-  // createRenderEffect(() => {
-  //   const url = new URL(window.location.href);
-  //   if (url.hash.startsWith('#access_token')) return setIsLoading(true);
-  //   setIsLoading(false);
-  // });
-
-  // if (isLoading() && !session())
-  //   return (
-  //     <Box minHeight={'100vh'} display='grid' placeItems={'center'}>
-  //       <Spinner
-  //         thickness='4px'
-  //         speed='0.65s'
-  //         emptyColor='$neutral4'
-  //         color='$info10'
-  //         size='xl'
-  //       />
-  //     </Box>
-  //   );
+  createRenderEffect(() => {
+    if (location.hash.startsWith('#access_token')) return setIsLoading(true);
+    if (isLoading() && session()) setIsLoading(false);
+  });
 
   return (
     <Routes>

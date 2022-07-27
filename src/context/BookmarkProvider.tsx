@@ -1,13 +1,14 @@
+import { Box, Flex, SkeletonCircle, SkeletonText } from '@hope-ui/solid';
 import {
   createContext,
   createEffect,
+  createResource,
   ParentComponent,
   useContext
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { createSupabaseFrom } from 'solid-supabase';
+import { createSupabase } from 'solid-supabase';
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '..';
 
 import type { AddNewBookmark, CategoriesBookmark } from '../types';
 
@@ -26,34 +27,29 @@ const BookmarkContext = createContext<BookmarkProps | undefined>([
 export const useBookmark = () => useContext(BookmarkContext)!;
 
 export const BookmarkProvider: ParentComponent = props => {
-  const from = createSupabaseFrom(); 
+  const [categories, setCategories] = createStore<CategoriesBookmark>([]);
+  const supabase = createSupabase();
+
+  const [data] = createResource(1, () => {
+    return supabase.from('category').select(`
+      id, title,
+      bookmarks (
+       category_id
+      )
+      `);
+  });
 
   createEffect(async () => {
-    let { data: Bookmark, error } = await supabase
-      .from('Bookmarks')
-      .select('*');
-    console.log(
-      '🚀 ~ file: BookmarkProvider.tsx ~ line 33 ~ createEffect ~ data',
-      Bookmark
-    );
-    if (error) console.log('error', error);
-  });
-  const [categories, setCategories] = createStore<CategoriesBookmark>([
-    {
-      id: 'eaa2f313-e7e7-47ae-8124-fd9642c1a833',
-      title: 'Social',
-      bookmarks: [
-        {
-          id: 'ceca5134-b6df-4552-a973-2578ed49f2c9',
-          url: 'http://google.com/'
-        },
-        {
-          id: '715a94f0-5cf1-422a-8f8c-b76ee715c258',
-          url: 'https://twitter.com/'
-        }
-      ]
+    if (data()) {
+      const categories = (await data())?.data as CategoriesBookmark;
+
+      setCategories(categories);
     }
-  ]);
+  });
+
+  createEffect(() => {
+    console.log(categories, 'categories');
+  });
 
   const addNewCategory = (category: string) => {
     let newCategory = {
@@ -73,9 +69,46 @@ export const BookmarkProvider: ParentComponent = props => {
   };
 
   const values = [categories, { addNewCategory, addNewBookmark }];
+
+  console.log(data.loading);
   return (
     <BookmarkContext.Provider value={values}>
-      {props.children}
+      {data.loading ? (
+        <Box>
+          <Box>
+            <SkeletonText
+              mt='$4'
+              width={'200px'}
+              noOfLines={1}
+              spacing='$4'
+              mb='$1_5'
+            />
+            <Flex mb='$6' gap='$2'>
+              <SkeletonCircle size='$10' />
+              <SkeletonCircle size='$10' />
+              <SkeletonCircle size='$10' />
+            </Flex>
+          </Box>
+          <Box>
+            <SkeletonText
+              mt='$4'
+              width={'200px'}
+              noOfLines={1}
+              spacing='$4'
+              mb='$1_5'
+            />
+            <Flex mb='$6' gap='$2'>
+              <SkeletonCircle size='$10' />
+              <SkeletonCircle size='$10' />
+              <SkeletonCircle size='$10' />
+              <SkeletonCircle size='$10' />
+              <SkeletonCircle size='$10' />
+            </Flex>
+          </Box>
+        </Box>
+      ) : (
+        props.children
+      )}
     </BookmarkContext.Provider>
   );
 };
