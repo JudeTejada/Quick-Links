@@ -12,43 +12,82 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { AddNewBookmark, CategoriesBookmark } from '../types';
 
-type BookmarkProps = [
-  bookmarks: CategoriesBookmark,
-  methods: {
+type BookmarkContextType = [
+  CategoriesBookmark,
+  {
     addNewCategory: (value: string) => void;
     addNewBookmark: (values: AddNewBookmark) => void;
   }
 ];
-const BookmarkContext = createContext<BookmarkProps | undefined>([
-  [],
-  { addNewCategory: () => {}, addNewBookmark: () => {} }
-]);
+const BookmarkContext = createContext<BookmarkContextType>();
 
 export const useBookmark = () => useContext(BookmarkContext)!;
 
-export const BookmarkProvider: ParentComponent = props => {
-  const [categories, setCategories] = createStore<CategoriesBookmark>([]);
-  const supabase = createSupabase();
+const SkeletonLoader = () => {
+  return (
+    <Box>
+      <Box>
+        <SkeletonText
+          mt='$4'
+          width={'200px'}
+          noOfLines={1}
+          spacing='$4'
+          mb='$1_5'
+        />
+        <Flex mb='$6' gap='$2'>
+          <SkeletonCircle size='$10' />
+          <SkeletonCircle size='$10' />
+          <SkeletonCircle size='$10' />
+        </Flex>
+      </Box>
+      <Box>
+        <SkeletonText
+          mt='$4'
+          width={'200px'}
+          noOfLines={1}
+          spacing='$4'
+          mb='$1_5'
+        />
+        <Flex mb='$6' gap='$2'>
+          <SkeletonCircle size='$10' />
+          <SkeletonCircle size='$10' />
+          <SkeletonCircle size='$10' />
+          <SkeletonCircle size='$10' />
+          <SkeletonCircle size='$10' />
+        </Flex>
+      </Box>
+    </Box>
+  );
+};
 
-  const [data] = createResource(1, () => {
-    return supabase.from('category').select(`
+const getTodos = async () => {
+  const supabase = createSupabase();
+  const { data, error } = await supabase.from<CategoriesBookmark>('category')
+    .select(`
       id, title,
       bookmarks (
        category_id
       )
       `);
-  });
 
-  createEffect(async () => {
-    if (data()) {
-      const categories = (await data())?.data as CategoriesBookmark;
+  if (error) {
+    throw error;
+  }
 
-      setCategories(categories);
-    }
-  });
+  return data;
+};
+
+export const BookmarkProvider: ParentComponent = props => {
+  const [categories, setCategories] = createStore<CategoriesBookmark>([]);
+  const [data] = createResource(getTodos);
 
   createEffect(() => {
-    console.log(categories, 'categories');
+    const returnedValue = data();
+    console.log(returnedValue, 'returnedValue');
+    if (returnedValue) {
+      console.log("🚀 ~ file: BookmarkProvider.tsx ~ line 87 ~ createEffect ~ returnedValue", returnedValue)
+      setCategories(returnedValue);
+    }
   });
 
   const addNewCategory = (category: string) => {
@@ -68,47 +107,14 @@ export const BookmarkProvider: ParentComponent = props => {
     );
   };
 
-  const values = [categories, { addNewCategory, addNewBookmark }];
+  const values: BookmarkContextType = [
+    categories,
+    { addNewCategory, addNewBookmark }
+  ];
 
-  console.log(data.loading);
   return (
     <BookmarkContext.Provider value={values}>
-      {data.loading ? (
-        <Box>
-          <Box>
-            <SkeletonText
-              mt='$4'
-              width={'200px'}
-              noOfLines={1}
-              spacing='$4'
-              mb='$1_5'
-            />
-            <Flex mb='$6' gap='$2'>
-              <SkeletonCircle size='$10' />
-              <SkeletonCircle size='$10' />
-              <SkeletonCircle size='$10' />
-            </Flex>
-          </Box>
-          <Box>
-            <SkeletonText
-              mt='$4'
-              width={'200px'}
-              noOfLines={1}
-              spacing='$4'
-              mb='$1_5'
-            />
-            <Flex mb='$6' gap='$2'>
-              <SkeletonCircle size='$10' />
-              <SkeletonCircle size='$10' />
-              <SkeletonCircle size='$10' />
-              <SkeletonCircle size='$10' />
-              <SkeletonCircle size='$10' />
-            </Flex>
-          </Box>
-        </Box>
-      ) : (
-        props.children
-      )}
+      {data.loading ? <SkeletonLoader /> : props.children}
     </BookmarkContext.Provider>
   );
 };

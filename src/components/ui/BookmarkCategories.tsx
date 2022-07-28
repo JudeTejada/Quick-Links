@@ -1,15 +1,23 @@
 import { Heading, ListItem, UnorderedList } from '@hope-ui/solid';
-import { createEffect, For } from 'solid-js';
-import { categoriesStore, useBookmark } from '../../context/BookmarkProvider';
+import { ErrorBoundary, For } from 'solid-js';
+import { useBookmark } from '../../context/BookmarkProvider';
 
 import { BookmarksList } from './BookmarksList';
 import { CreateNewCategory } from './CreateNewCategory';
+import { ErrorText } from './ErrorText';
 
 function BookmarkCategories() {
   const [categories] = useBookmark();
 
+  console.log(categories, 'categories from BookmarkCategories');
+
+  if (!categories) return null;
   return (
-    <>
+    <ErrorBoundary
+      fallback={
+        <ErrorText text='Something went wrong!, try refreshing your browser' />
+      }
+    >
       <UnorderedList mb={'$8'}>
         <For each={categories}>
           {(cat, i) => (
@@ -23,7 +31,7 @@ function BookmarkCategories() {
         </For>
       </UnorderedList>
       <CreateNewCategory />
-    </>
+    </ErrorBoundary>
   );
 }
 
