@@ -10,18 +10,29 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@hope-ui/solid';
-import { createEffect, createSignal } from 'solid-js';
-import { useBookmark } from '../../context/BookmarkProvider';
+import { createSignal } from 'solid-js';
+import { createSupabase } from 'solid-supabase';
+import { BookmarkGroup } from '../../types';
 
-function CreateNewCategory() {
+function AddNewCategory() {
   const [categoryText, setCategoryText] = createSignal('');
 
-  const [_, { addNewCategory }] = useBookmark();
+  const supabase = createSupabase();
 
+  const addNewCategory = async () => {
+    const { data, error } = await supabase
+      .from<BookmarkGroup>('category')
+      .insert({
+        title: categoryText()
+      });
+    if (error) {
+      console.error(error);
+    }
+  };
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!categoryText()) return;
 
-    if (e.key === 'Enter') addNewCategory(categoryText());
+    if (e.key === 'Enter') addNewCategory();
   };
 
   const handleInput = (event: InputEvent) => {
@@ -56,4 +67,4 @@ function CreateNewCategory() {
   );
 }
 
-export { CreateNewCategory };
+export { AddNewCategory as CreateNewCategory };

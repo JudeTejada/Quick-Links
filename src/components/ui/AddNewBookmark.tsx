@@ -12,17 +12,30 @@ import {
   PopoverTrigger
 } from '@hope-ui/solid';
 import { createEffect, createSignal, Show } from 'solid-js';
+import { createSupabase } from 'solid-supabase';
 import { isUrl } from '../../util';
 
-function CreateBookmark(props: { onAddNewLink: (value: string) => void }) {
+function AddNewBookmark(props: { categoryId: string }) {
   const [url, setUrl] = createSignal('');
   const [invalidUrl, setInvalidUrl] = createSignal(false);
   const [pressedEnter, setPressendEnter] = createSignal(false);
+
+  const supabase = createSupabase();
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!url()) return;
 
     if (e.key === 'Enter') setPressendEnter(true);
+  };
+
+  const addNewUrl = async () => {
+    const { data, error } = await supabase.from('bookmarks').insert({
+      url: url(),
+      category_id: props.categoryId
+    });
+    if (error) {
+      console.error(error);
+    }
   };
 
   const handleInput = (event: InputEvent) => {
@@ -39,7 +52,7 @@ function CreateBookmark(props: { onAddNewLink: (value: string) => void }) {
 
       setPressendEnter(false);
 
-      props.onAddNewLink(url());
+      addNewUrl();
     }
   });
 
@@ -82,4 +95,4 @@ function CreateBookmark(props: { onAddNewLink: (value: string) => void }) {
   );
 }
 
-export { CreateBookmark };
+export { AddNewBookmark as CreateBookmark };

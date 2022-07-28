@@ -1,6 +1,8 @@
 type Bookmark = {
   url: string;
   id: string;
+  category_id: string;
+  created_at: string;
 };
 
 type BookmarkGroup = {
@@ -11,9 +13,4 @@ type BookmarkGroup = {
 
 type CategoriesBookmark = BookmarkGroup[];
 
-type AddNewBookmark = {
-  categoryId: string;
-  url: string;
-};
-
-export type { Bookmark, BookmarkGroup, CategoriesBookmark, AddNewBookmark };
+export type { Bookmark, BookmarkGroup, CategoriesBookmark };

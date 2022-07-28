@@ -1,24 +1,17 @@
 import { Image, List, ListItem } from '@hope-ui/solid';
 import { Link } from 'solid-app-router';
 import { For } from 'solid-js';
-import { useBookmark } from '../../context/BookmarkProvider';
 
 import type { Bookmark } from '../../types';
 import { removeHttp } from '../../util';
-import { CreateBookmark } from './CreateBookMark';
+import { CreateBookmark } from './AddNewBookmark';
 
 interface BookmarksListProps {
   list: Bookmark[];
-  id: string;
+  categoryId: string;
 }
 
 function BookmarksList(props: BookmarksListProps) {
-  const [, { addNewBookmark }] = useBookmark();
-
-  const handleNewLink = (url: string) => {
-    addNewBookmark({ url, categoryId: props.id });
-  };
-
   return (
     <>
       <List mb={'$6'} display='flex' gap={'$2'} alignItems='center'>
@@ -38,7 +31,7 @@ function BookmarksList(props: BookmarksListProps) {
           )}
         </For>
         <ListItem>
-          <CreateBookmark onAddNewLink={handleNewLink} />
+          <CreateBookmark categoryId={props.categoryId} />
         </ListItem>
       </List>
     </>

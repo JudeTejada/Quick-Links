@@ -1,72 +1,30 @@
-import { Box, Flex, SkeletonCircle, SkeletonText } from '@hope-ui/solid';
+import { RealtimeSubscription } from '@supabase/supabase-js';
 import {
   createContext,
   createEffect,
   createResource,
+  onCleanup,
+  onMount,
   ParentComponent,
   useContext
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { createSupabase } from 'solid-supabase';
-import { v4 as uuidv4 } from 'uuid';
 
-import type { AddNewBookmark, CategoriesBookmark } from '../types';
+import type { Bookmark, BookmarkGroup, CategoriesBookmark } from '../types';
 
-type BookmarkContextType = [
-  CategoriesBookmark,
-  {
-    addNewCategory: (value: string) => void;
-    addNewBookmark: (values: AddNewBookmark) => void;
-  }
-];
-const BookmarkContext = createContext<BookmarkContextType>();
+const BookmarkContext = createContext<CategoriesBookmark>();
 
 export const useBookmark = () => useContext(BookmarkContext)!;
-
-const SkeletonLoader = () => {
-  return (
-    <Box>
-      <Box>
-        <SkeletonText
-          mt='$4'
-          width={'200px'}
-          noOfLines={1}
-          spacing='$4'
-          mb='$1_5'
-        />
-        <Flex mb='$6' gap='$2'>
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-        </Flex>
-      </Box>
-      <Box>
-        <SkeletonText
-          mt='$4'
-          width={'200px'}
-          noOfLines={1}
-          spacing='$4'
-          mb='$1_5'
-        />
-        <Flex mb='$6' gap='$2'>
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-        </Flex>
-      </Box>
-    </Box>
-  );
-};
-
 const getTodos = async () => {
   const supabase = createSupabase();
   const { data, error } = await supabase.from<CategoriesBookmark>('category')
     .select(`
       id, title,
       bookmarks (
-       category_id
+       category_id,
+       url,
+       id
       )
       `);
 
@@ -78,43 +36,74 @@ const getTodos = async () => {
 };
 
 export const BookmarkProvider: ParentComponent = props => {
+  const supabase = createSupabase();
   const [categories, setCategories] = createStore<CategoriesBookmark>([]);
   const [data] = createResource(getTodos);
 
   createEffect(() => {
     const returnedValue = data();
-    console.log(returnedValue, 'returnedValue');
     if (returnedValue) {
-      console.log("🚀 ~ file: BookmarkProvider.tsx ~ line 87 ~ createEffect ~ returnedValue", returnedValue)
       setCategories(returnedValue);
     }
   });
+  let categoriesSubscription: RealtimeSubscription | null;
+  let bookmarkSubscription: RealtimeSubscription | null;
 
-  const addNewCategory = (category: string) => {
-    let newCategory = {
-      title: category,
-      id: uuidv4(),
-      bookmarks: []
-    };
-    setCategories([...categories, newCategory]);
-  };
+  onMount(() => {
+    categoriesSubscription = supabase
+      .from<BookmarkGroup>('category')
+      .on('*', payload => {
+        switch (payload.eventType) {
+          case 'INSERT':
+            console.log('payload.new', payload.new);
+            setCategories([...categories, payload.new]);
+            break;
+          // case 'UPDATE':
+          //   setTodos(item => item.id === payload.new.id, payload.new);
+          //   break;
+          // case 'DELETE':
+          //   setTodos(prev => prev.filter(item => item.id != payload.old.id));
+          //   break;
+        }
+      })
+      .subscribe();
 
-  const addNewBookmark = ({ url, categoryId }: AddNewBookmark) => {
-    setCategories(
-      category => category.id === categoryId,
-      'bookmarks',
-      bookmarks => [...bookmarks, { id: uuidv4(), url }]
-    );
-  };
+    bookmarkSubscription = supabase
+      .from<Bookmark>('bookmarks')
+      .on('*', payload => {
+        switch (payload.eventType) {
+          case 'INSERT':
+            {
+              console.log(payload.new);
+              const { category_id } = payload.new;
+              console.log(category_id, 'category_id');
+              setCategories(
+                category => category.id === category_id,
+                'bookmarks',
+                // @ts-ignore
+                bookmarks => [...bookmarks, { ...payload.new }]
+              );
+            }
+            break;
+          // case 'UPDATE':
+          //   setTodos(item => item.id === payload.new.id, payload.new);
+          //   break;
+          // case 'DELETE':
+          //   setTodos(prev => prev.filter(item => item.id != payload.old.id));
+          //   break;
+        }
+      })
+      .subscribe();
+  });
 
-  const values: BookmarkContextType = [
-    categories,
-    { addNewCategory, addNewBookmark }
-  ];
+  onCleanup(() => {
+    categoriesSubscription?.unsubscribe();
+    bookmarkSubscription?.unsubscribe();
+  });
 
   return (
-    <BookmarkContext.Provider value={values}>
-      {data.loading ? <SkeletonLoader /> : props.children}
+    <BookmarkContext.Provider value={categories}>
+      {props.children}
     </BookmarkContext.Provider>
   );
 };
