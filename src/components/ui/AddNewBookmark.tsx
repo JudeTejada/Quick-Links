@@ -1,9 +1,7 @@
 import {
   Button,
   FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
+  notificationService,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -11,50 +9,24 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@hope-ui/solid';
-import { createEffect, createSignal, Show } from 'solid-js';
 import { createSupabase } from 'solid-supabase';
-import { isUrl } from '../../util';
+import { Input } from './Input';
 
 function AddNewBookmark(props: { categoryId: string }) {
-  const [url, setUrl] = createSignal('');
-  const [invalidUrl, setInvalidUrl] = createSignal(false);
-  const [pressedEnter, setPressendEnter] = createSignal(false);
-
   const supabase = createSupabase();
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (!url()) return;
-
-    if (e.key === 'Enter') setPressendEnter(true);
-  };
-
-  const addNewUrl = async () => {
+  const handleEnter = async (text: string) => {
     const { data, error } = await supabase.from('bookmarks').insert({
-      url: url(),
+      url: text,
       category_id: props.categoryId
     });
-    if (error) {
-      console.error(error);
-    }
+    if (error)
+      return notificationService.show({
+        status: 'danger',
+        title: 'Error!',
+        description: 'failed to add a new bookmark'
+      });
   };
-
-  const handleInput = (event: InputEvent) => {
-    const element = event.target as HTMLInputElement;
-    setUrl(element.value);
-    setInvalidUrl(false);
-  };
-
-  createEffect(() => {
-    const isUrlValid = isUrl(url());
-
-    if (pressedEnter()) {
-      if (!isUrlValid) return setInvalidUrl(true);
-
-      setPressendEnter(false);
-
-      addNewUrl();
-    }
-  });
 
   return (
     <>
@@ -72,21 +44,13 @@ function AddNewBookmark(props: { categoryId: string }) {
           <PopoverCloseButton />
           <PopoverBody>
             <FormControl>
-              <FormLabel for='email'></FormLabel>
-
               <Input
+                errorText='invalid url'
+                type='bookmark'
                 placeholder='https://www.google.com/'
                 id='category'
-                type='text'
-                value={url()}
-                onInput={handleInput}
-                onKeyDown={handleKeyDown}
-                invalid={invalidUrl()}
+                onSuccessHandler={handleEnter}
               />
-
-              <Show when={invalidUrl()} fallback={null}>
-                <FormHelperText color={'$danger9'}>Invalid url</FormHelperText>
-              </Show>
             </FormControl>
           </PopoverBody>
         </PopoverContent>

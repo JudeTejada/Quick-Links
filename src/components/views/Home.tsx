@@ -2,6 +2,7 @@ import { Box, Button, Container, Flex, Heading, Spacer } from '@hope-ui/solid';
 import { Navigate } from 'solid-app-router';
 import { Component } from 'solid-js';
 import { createSupabaseAuth } from 'solid-supabase';
+import { useOnlineStatus } from 'solid-use';
 import { BookmarkProvider } from '../../context/BookmarkProvider';
 
 import { useAuth } from '../auth';
@@ -9,13 +10,17 @@ import { BookmarkCategories, CreateBookmark } from '../ui';
 
 const Home: Component = () => {
   const session = useAuth();
+  const isOnline = useOnlineStatus();
 
   if (!session()) return <Navigate href={'/login'} />;
 
+  console.log(isOnline());
   const auth = createSupabaseAuth();
   const handleLogout = () => {
     auth.signOut();
   };
+  if (!isOnline())
+    return <h1>There seems to be an issue with your wifi connection</h1>;
   return (
     <Container p={'$20'} maxW='$5xl'>
       <Flex alignItems={'center'}>

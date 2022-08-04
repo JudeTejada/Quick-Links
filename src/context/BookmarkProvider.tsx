@@ -58,12 +58,18 @@ export const BookmarkProvider: ParentComponent = props => {
             console.log('payload.new', payload.new);
             setCategories([...categories, payload.new]);
             break;
-          // case 'UPDATE':
-          //   setTodos(item => item.id === payload.new.id, payload.new);
-          //   break;
-          // case 'DELETE':
-          //   setTodos(prev => prev.filter(item => item.id != payload.old.id));
-          //   break;
+          case 'UPDATE':
+            setCategories(
+              category => category.id === payload.new.id,
+              payload.new
+            );
+            break;
+          case 'DELETE':
+            setCategories(state =>
+              state.filter(category => category.id !== payload.old.id)
+            );
+
+            break;
         }
       })
       .subscribe();
@@ -74,9 +80,7 @@ export const BookmarkProvider: ParentComponent = props => {
         switch (payload.eventType) {
           case 'INSERT':
             {
-              console.log(payload.new);
               const { category_id } = payload.new;
-              console.log(category_id, 'category_id');
               setCategories(
                 category => category.id === category_id,
                 'bookmarks',
