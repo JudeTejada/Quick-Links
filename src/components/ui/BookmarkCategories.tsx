@@ -20,16 +20,14 @@ function BookmarkCategories() {
   const categories = useBookmark();
 
   return (
-    <ErrorBoundary fallback={<ErrorText text='something went wrong, sorry.' />}>
-      <UnorderedList mb={'$8'}>
-        <For each={categories} fallback={BookmarkLoader}>
-          {(cat, i) => (
-            <List title={cat.title} bookmarks={cat.bookmarks} id={cat.id} />
-          )}
-        </For>
-        <CreateNewCategory />
-      </UnorderedList>
-    </ErrorBoundary>
+    <UnorderedList mb={'$8'}>
+      <For each={categories} fallback={<div>no bookmarks</div>}>
+        {(cat, i) => (
+          <List title={cat.title} bookmarks={cat.bookmarks} id={cat.id} />
+        )}
+      </For>
+      <CreateNewCategory />
+    </UnorderedList>
   );
 }
 

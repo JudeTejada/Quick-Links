@@ -37,10 +37,10 @@ export function CategoryPreferences(props: {
     const { data, error } = await supabase
       .from('category')
       .delete()
-      .eq('id', props.categoryId);
+      .match({ id: props.categoryId });
 
-    if (data) setIsLoading(true);
-    if (error) alert(error);
+    if (data) setIsLoading(false);
+    if (error) console.log(error);
   };
 
   return (
@@ -59,7 +59,12 @@ export function CategoryPreferences(props: {
             >
               edit title
             </Button>
-            <Button css={{ margin: '0' }} colorScheme='danger' onClick={onOpen}>
+            <Button
+              css={{ margin: '0' }}
+              colorScheme='danger'
+              onClick={onOpen}
+              loading={isLoading()}
+            >
               delete category
             </Button>
           </PopoverBody>

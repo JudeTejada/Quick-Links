@@ -3,13 +3,17 @@ import {
   createContext,
   createEffect,
   createResource,
+  ErrorBoundary,
   onCleanup,
   onMount,
   ParentComponent,
+  Show,
   useContext
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { createSupabase } from 'solid-supabase';
+import { BookmarkLoader } from '../components/ui/BookmarkLoader';
+import { ErrorText } from '../components/ui/ErrorText';
 
 import type { Bookmark, BookmarkGroup, CategoriesBookmark } from '../types';
 
@@ -84,7 +88,6 @@ export const BookmarkProvider: ParentComponent = props => {
               setCategories(
                 category => category.id === category_id,
                 'bookmarks',
-                // @ts-ignore
                 bookmarks => [...bookmarks, { ...payload.new }]
               );
             }
@@ -107,7 +110,13 @@ export const BookmarkProvider: ParentComponent = props => {
 
   return (
     <BookmarkContext.Provider value={categories}>
-      {props.children}
+      <ErrorBoundary
+        fallback={<ErrorText text='something went wrong, sorry.' />}
+      >
+        <Show when={!data.loading} fallback={<BookmarkLoader />}>
+          {props.children}
+        </Show>
+      </ErrorBoundary>
     </BookmarkContext.Provider>
   );
 };
