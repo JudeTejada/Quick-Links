@@ -1,24 +1,20 @@
 import {
   Button,
-  ButtonGroup,
   createDisclosure,
-  Icon,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuTrigger,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTrigger
+  ModalOverlay
 } from '@hope-ui/solid';
 import { HiOutlineDotsHorizontal } from 'solid-icons/hi';
+import { BiSolidEdit } from 'solid-icons/bi';
+import { HiOutlineTrash } from 'solid-icons/hi';
 import { createSignal } from 'solid-js';
 import { createSupabase } from 'solid-supabase';
 
@@ -37,39 +33,47 @@ export function CategoryPreferences(props: {
     const { data, error } = await supabase
       .from('category')
       .delete()
-      .match({ id: props.categoryId });
+      .match({ id: props.categoryId }); 
 
-    if (data) setIsLoading(false);
+    if (data) {
+      setIsLoading(false);
+      onClose();
+    }
     if (error) console.log(error);
   };
 
   return (
     <>
-      <Popover placement='bottom-start' triggerMode='click'>
-        <PopoverTrigger as={HiOutlineDotsHorizontal}>Trigger</PopoverTrigger>
-        <PopoverContent maxW={'$60'}>
-          <PopoverArrow />
-          <PopoverCloseButton />
-          <PopoverHeader>Change Category</PopoverHeader>
+      <Menu>
+        <MenuTrigger
+          as={HiOutlineDotsHorizontal}
+          _active={{
+            boxShadow: '$outline'
+          }}
+          _focus={{
+            boxShadow: '$outline'
+          }}
+        >
+          Edit
+        </MenuTrigger>
+        <MenuContent maxW={'$60'}>
+          <MenuItem
+            icon={<BiSolidEdit />}
+            onSelect={() => props.onToggleEditText(true)}
+          >
+            Edit Title
+          </MenuItem>
+          <MenuItem
+            colorScheme='danger'
+            icon={<HiOutlineTrash />}
+            disabled={isLoading()}
+            onSelect={onOpen}
+          >
+            Delete category
+          </MenuItem>
+        </MenuContent>
+      </Menu>
 
-          <PopoverBody display={'flex'} flexDirection='column' rowGap='$2'>
-            <Button
-              css={{ margin: '0' }}
-              onClick={() => props.onToggleEditText(true)}
-            >
-              edit title
-            </Button>
-            <Button
-              css={{ margin: '0' }}
-              colorScheme='danger'
-              onClick={onOpen}
-              loading={isLoading()}
-            >
-              delete category
-            </Button>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
       <Modal centered opened={isOpen()} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -80,7 +84,11 @@ export function CategoryPreferences(props: {
 
           <ModalFooter gap='$4'>
             <Button onClick={onClose}>Cancel</Button>
-            <Button colorScheme='danger' onClick={handleDelete}>
+            <Button
+              colorScheme='danger'
+              onClick={handleDelete}
+              loading={isLoading()}
+            >
               Confirm
             </Button>
           </ModalFooter>

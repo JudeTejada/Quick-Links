@@ -26,14 +26,14 @@ const Home: Component = () => {
       <Flex alignItems={'center'}>
         <Box>
           <Heading size={'3xl'} mb='$1'>
-            Minimal solid marks
+            Solid marks
           </Heading>
           <Heading size='base' color='$blackAlpha11'>
             {session()?.user?.email}
           </Heading>
         </Box>
         <Spacer />
-        <Button onClick={handleLogout}>logout</Button>
+        <Button onClick={handleLogout}>Sign out</Button>
       </Flex>
       <Box
         mt='$10'

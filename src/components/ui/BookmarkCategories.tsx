@@ -1,13 +1,16 @@
 import {
+  Button,
   Heading,
   HStack,
+  IconButton,
   ListItem,
   notificationService,
   UnorderedList
 } from '@hope-ui/solid';
-import { createSignal, ErrorBoundary, For, Show } from 'solid-js';
+import { createEffect, createSignal, For, Show } from 'solid-js';
 import { useBookmark } from '../../context/BookmarkProvider';
 import { BookmarkLoader } from './BookmarkLoader';
+import { HiOutlineX } from 'solid-icons/hi';
 import { BookmarksList } from './BookmarksList';
 import { CreateNewCategory } from './AddNewCategory';
 import { ErrorText } from './ErrorText';
@@ -16,12 +19,12 @@ import { BookmarkGroup } from '../../types';
 import { Input } from './Input';
 import { createSupabase } from 'solid-supabase';
 
-function BookmarkCategories() {
+export function BookmarkCategories() {
   const categories = useBookmark();
 
   return (
     <UnorderedList mb={'$8'}>
-      <For each={categories} fallback={<div>no bookmarks</div>}>
+      <For each={categories}>
         {(cat, i) => (
           <List title={cat.title} bookmarks={cat.bookmarks} id={cat.id} />
         )}
@@ -33,8 +36,13 @@ function BookmarkCategories() {
 
 const List = (props: BookmarkGroup) => {
   const [isEditing, setIsEditing] = createSignal(false);
+  const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
 
   const supabase = createSupabase();
+
+  createEffect(() => {
+    console.log(inputElm()?.focus());
+  });
 
   const handleInputEnter = async (text: string) => {
     const { data, error } = await supabase
@@ -54,32 +62,36 @@ const List = (props: BookmarkGroup) => {
 
   return (
     <ListItem>
-      <HStack gap='$4'>
+      <HStack gap='$4' mb={'$1_5'}>
         <Show
-          when={isEditing()}
+          when={!isEditing()}
           fallback={
-            <Heading mb={'$1_5'} size='2xl'>
-              {props.title}
-            </Heading>
+            <>
+              <Input
+                ref={setInputElm}
+                text={props.title}
+                errorText='please enter a category'
+                type='category'
+                onSuccessHandler={handleInputEnter}
+              />
+
+              <IconButton
+                aria-label='close-icon'
+                onClick={() => setIsEditing(false)}
+                icon={<HiOutlineX />}
+              />
+            </>
           }
         >
-          <Input
-            text={props.title}
-            errorText='please enter a category'
-            type='category'
-            onSuccessHandler={handleInputEnter}
+          <Heading size='2xl'>{props.title}</Heading>
+          <CategoryPreferences
+            onToggleEditText={setIsEditing}
+            categoryId={props.id}
+            categoryTitle={props.title}
           />
         </Show>
-
-        <CategoryPreferences
-          onToggleEditText={setIsEditing}
-          categoryId={props.id}
-          categoryTitle={props.title}
-        />
       </HStack>
       <BookmarksList list={props.bookmarks} categoryId={props.id} />
     </ListItem>
   );
 };
-
-export { BookmarkCategories };

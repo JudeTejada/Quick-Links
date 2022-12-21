@@ -17,7 +17,7 @@ function BookmarksList(props: BookmarksListProps) {
       <For each={props.list}>
         {(bookmark, i) => (
           <ListItem>
-            <Link href={bookmark.url}>
+            <a href={bookmark.url} target='_blank'>
               <Image
                 borderRadius={'$full'}
                 boxSize='24px'
@@ -25,7 +25,7 @@ function BookmarksList(props: BookmarksListProps) {
                 alt={bookmark.url}
                 objectFit='cover'
               />
-            </Link>
+            </a>
           </ListItem>
         )}
       </For>

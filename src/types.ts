@@ -9,6 +9,7 @@ type BookmarkGroup = {
   title: string;
   id: string;
   bookmarks: Bookmark[];
+  user_id: string;
 };
 
 type CategoriesBookmark = BookmarkGroup[];

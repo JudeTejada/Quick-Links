@@ -12,6 +12,7 @@ import {
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { createSupabase } from 'solid-supabase';
+import { useAuth } from '../components/auth';
 import { BookmarkLoader } from '../components/ui/BookmarkLoader';
 import { ErrorText } from '../components/ui/ErrorText';
 
@@ -22,15 +23,20 @@ const BookmarkContext = createContext<CategoriesBookmark>();
 export const useBookmark = () => useContext(BookmarkContext)!;
 const getTodos = async () => {
   const supabase = createSupabase();
-  const { data, error } = await supabase.from<CategoriesBookmark>('category')
-    .select(`
+  const session = useAuth();
+
+  const { data, error } = await supabase
+    .from<CategoriesBookmark>('category')
+    .select(
+      `
       id, title,
       bookmarks (
        category_id,
        url,
        id
       )
-      `);
+      `
+    );
 
   if (error) {
     throw error;
@@ -59,7 +65,6 @@ export const BookmarkProvider: ParentComponent = props => {
       .on('*', payload => {
         switch (payload.eventType) {
           case 'INSERT':
-            console.log('payload.new', payload.new);
             setCategories([...categories, payload.new]);
             break;
           case 'UPDATE':

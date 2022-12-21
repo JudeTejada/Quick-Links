@@ -16,6 +16,7 @@ interface InputProps {
   text?: string;
   placeholder?: string;
   id?: string;
+  ref?: HTMLInputElement | ((el: HTMLInputElement) => void) | undefined;
   onSuccessHandler: (text: string) => void;
 }
 
@@ -31,7 +32,7 @@ export function Input(props: InputProps) {
   const [text, setText] = createSignal(props.text || '');
   const [isError, setIsError] = createSignal(false);
 
-  const handleEnter = (event: KeyboardEvent) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
     const isError = validateInput(text(), props.type);
     if (event.key === 'Enter') {
       isError ? setIsError(true) : props.onSuccessHandler(text());
@@ -40,6 +41,7 @@ export function Input(props: InputProps) {
 
   const handleInput = (event: InputEvent) => {
     const element = event.target as HTMLInputElement;
+
     setIsError(false);
     setText(element.value);
   };
@@ -52,12 +54,13 @@ export function Input(props: InputProps) {
         </Show>
 
         <HopeUiInput
+          ref={props.ref}
           placeholder={props.placeholder}
           id={props.label}
           type={props.inputType || 'text'}
           value={text()}
           onInput={handleInput}
-          onkeydown={handleEnter}
+          onkeydown={handleKeyDown}
           invalid={isError()}
         />
 

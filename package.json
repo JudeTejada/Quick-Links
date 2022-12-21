@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "vite",
-    "dev": "vite --port 3001",
+    "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
   },

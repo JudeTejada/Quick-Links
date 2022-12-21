@@ -16,6 +16,7 @@ const App: Component = () => {
   useSupabaseListener();
   const session = useAuth();
 
+
   const [isLoading, setIsLoading] = createSignal(false);
   const location = useLocation();
 
