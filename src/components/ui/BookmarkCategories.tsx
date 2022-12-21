@@ -22,6 +22,7 @@ import { createSupabase } from 'solid-supabase';
 export function BookmarkCategories() {
   const categories = useBookmark();
 
+  console.log('test commit')
   return (
     <UnorderedList mb={'$8'}>
       <For each={categories}>
