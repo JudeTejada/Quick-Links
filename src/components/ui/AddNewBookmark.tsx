@@ -1,5 +1,6 @@
 import {
   Button,
+  createDisclosure,
   FormControl,
   notificationService,
   Popover,
@@ -11,21 +12,26 @@ import {
 } from '@hope-ui/solid';
 import { createEffect, createSignal } from 'solid-js';
 import { createSupabase } from 'solid-supabase';
+import { useAuth } from '../auth';
 import { Input } from './Input';
 
 function AddNewBookmark(props: { categoryId: string }) {
   const supabase = createSupabase();
+  const session = useAuth();
+
+  const { isOpen, onClose, onToggle } = createDisclosure();
 
   const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
 
   createEffect(() => {
-    console.log(inputElm()?.focus());
+    inputElm()?.focus();
   });
 
   const handleEnter = async (text: string) => {
-    const { data, error } = await supabase.from('bookmarks').insert({
+    const { data, error } = await supabase.from('links').insert({
       url: text,
-      category_id: props.categoryId
+      category_id: props.categoryId,
+      user_id: session()?.user?.id
     });
     if (error)
       return notificationService.show({
@@ -35,13 +41,13 @@ function AddNewBookmark(props: { categoryId: string }) {
       });
 
     if (data) {
-      return window.focus();
+      document.getElementById('root').click();
     }
   };
 
   return (
     <>
-      <Popover
+      <Popover  
         closeOnBlur
         triggerMode='click'
         placement='top-start'

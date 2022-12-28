@@ -13,8 +13,8 @@ import { useAuth } from '../auth';
 import { createEffect, createSignal } from 'solid-js';
 
 function AddNewCategory() {
-  const supabase = createSupabase();
   const session = useAuth();
+  const supabase = createSupabase();
 
   const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
 
@@ -22,11 +22,11 @@ function AddNewCategory() {
     console.log(inputElm()?.focus());
   });
 
-  const handleInputEnter = async (text: string) => {
+  const handleInputEnter = async (title: string) => {
     const { data, error } = await supabase
-      .from<BookmarkGroup>('category')
+      .from<BookmarkGroup>('bookmarks')
       .insert({
-        title: text,
+        title,
         user_id: session()?.user?.id
       });
 

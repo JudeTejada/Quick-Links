@@ -1,15 +1,10 @@
-type Bookmark = {
-  url: string;
-  id: string;
-  category_id: string;
-  created_at: string;
-};
+import { Database } from './types/supabase';
 
-type BookmarkGroup = {
-  title: string;
-  id: string;
-  bookmarks: Bookmark[];
-  user_id: string;
+type Bookmark = Database['public']['Tables']['links']['Row'];
+
+type BookmarkList = Bookmark[];
+type BookmarkGroup = Database['public']['Tables']['bookmarks']['Row'] & {
+  links: BookmarkList;
 };
 
 type CategoriesBookmark = BookmarkGroup[];

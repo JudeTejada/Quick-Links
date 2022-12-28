@@ -23,15 +23,14 @@ const BookmarkContext = createContext<CategoriesBookmark>();
 export const useBookmark = () => useContext(BookmarkContext)!;
 const getTodos = async () => {
   const supabase = createSupabase();
-  const session = useAuth();
 
   const { data, error } = await supabase
-    .from<CategoriesBookmark>('category')
+    .from<CategoriesBookmark>('bookmarks')
     .select(
       `
-      id, title,
-      bookmarks (
-       category_id,
+      category_id,
+      title,
+      links (
        url,
        id
       )
@@ -61,7 +60,7 @@ export const BookmarkProvider: ParentComponent = props => {
 
   onMount(() => {
     categoriesSubscription = supabase
-      .from<BookmarkGroup>('category')
+      .from<BookmarkGroup>('bookmarks')
       .on('*', payload => {
         switch (payload.eventType) {
           case 'INSERT':
@@ -73,26 +72,31 @@ export const BookmarkProvider: ParentComponent = props => {
               payload.new
             );
             break;
-          case 'DELETE':
+          case 'DELETE': {
+            const oldData = payload.old;
+            console.log(oldData);
             setCategories(state =>
-              state.filter(category => category.id !== payload.old.id)
+              state.filter(
+                category => category.category_id !== payload.old.category_id
+              )
             );
 
             break;
+          }
         }
       })
       .subscribe();
 
     bookmarkSubscription = supabase
-      .from<Bookmark>('bookmarks')
+      .from<Bookmark>('links')
       .on('*', payload => {
         switch (payload.eventType) {
           case 'INSERT':
             {
               const { category_id } = payload.new;
               setCategories(
-                category => category.id === category_id,
-                'bookmarks',
+                category => category.category_id === category_id,
+                'links',
                 bookmarks => [...bookmarks, { ...payload.new }]
               );
             }

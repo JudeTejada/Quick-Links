@@ -31,15 +31,18 @@ export function CategoryPreferences(props: {
   const handleDelete = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
-      .from('category')
+      .from('bookmarks')
       .delete()
-      .match({ id: props.categoryId }); 
+      .match({ category_id: props.categoryId });
 
     if (data) {
       setIsLoading(false);
       onClose();
     }
-    if (error) console.log(error);
+    if (error) {
+      onClose();
+      console.log(error);
+    }
   };
 
   return (
