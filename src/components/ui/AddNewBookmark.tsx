@@ -1,12 +1,10 @@
 import {
   Button,
-  createDisclosure,
   FormControl,
   notificationService,
   Popover,
   PopoverArrow,
   PopoverBody,
-  PopoverCloseButton,
   PopoverContent,
   PopoverTrigger
 } from '@hope-ui/solid';
@@ -18,8 +16,6 @@ import { Input } from './Input';
 function AddNewBookmark(props: { categoryId: string }) {
   const supabase = createSupabase();
   const session = useAuth();
-
-  const { isOpen, onClose, onToggle } = createDisclosure();
 
   const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
 
@@ -41,13 +37,15 @@ function AddNewBookmark(props: { categoryId: string }) {
       });
 
     if (data) {
-      document.getElementById('root').click();
+      const bodyElm = document.getElementsByTagName('BODY')[0];
+
+      inputElm()?.blur();
     }
   };
 
   return (
     <>
-      <Popover  
+      <Popover
         closeOnBlur
         triggerMode='click'
         placement='top-start'

@@ -4,7 +4,8 @@ import {
   FormLabel,
   Input as HopeUiInput
 } from '@hope-ui/solid';
-import { createEffect, createSignal, Show } from 'solid-js';
+import { useCurrentlyHeldKey } from '@solid-primitives/keyboard';
+import { createSignal, onMount, Show } from 'solid-js';
 import { isUrl } from '../../util';
 
 type InputType = 'category' | 'bookmark';
@@ -45,8 +46,9 @@ const getFormattedValue = (text: string, type: InputType) => {
 export function Input(props: InputProps) {
   const [text, setText] = createSignal(props.text || '');
   const [isError, setIsError] = createSignal(false);
+  const key = useCurrentlyHeldKey();
 
-  createEffect(() => {
+  onMount(() => {
     if (props.type === 'bookmark') setText('https://');
   });
 
@@ -55,20 +57,20 @@ export function Input(props: InputProps) {
     if (event.key === 'Enter') {
       isError ? setIsError(true) : props.onSuccessHandler(text());
     }
-
-    //
   };
 
   const handleInput = (event: InputEvent) => {
     setIsError(false);
     const element = event.target as HTMLInputElement;
 
-    if (props.type === 'bookmark' && text() === 'https://') return;
-    if (props.type === 'bookmark' && !text().endsWith('https://'))
+    if (
+      props.type === 'bookmark' &&
+      key() === 'BACKSPACE' &&
+      text().endsWith('https://')
+    )
       return setText('https://');
 
     let inputValue = getFormattedValue(element.value, props.type);
-
     setText(inputValue);
   };
 
