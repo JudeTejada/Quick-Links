@@ -19,7 +19,7 @@ function AddNewCategory() {
   const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
 
   createEffect(() => {
-    console.log(inputElm()?.focus());
+    inputElm()?.focus();
   });
 
   const handleInputEnter = async (title: string) => {
@@ -29,6 +29,8 @@ function AddNewCategory() {
         title,
         user_id: session()?.user?.id
       });
+
+      if(data) inputElm()?.blur();
 
     if (error) {
       console.error(error);
