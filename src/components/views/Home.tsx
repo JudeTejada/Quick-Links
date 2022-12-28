@@ -22,7 +22,7 @@ const Home: Component = () => {
   if (!isOnline())
     return <h1>There seems to be an issue with your wifi connection</h1>;
   return (
-    <Container p={'$20'} maxW='$5xl'>
+    <Container p={{ '@initial': '$4', '@md': '$20' }} maxW='$5xl'>
       <Flex alignItems={'center'}>
         <Box>
           <Heading size={'3xl'} mb='$1'>

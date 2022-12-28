@@ -92,7 +92,7 @@ const List = (props: BookmarkGroup) => {
             </Flex>
           }
         >
-          <Heading size='2xl'>{props.title}</Heading>
+          <Heading size='3xl'>{props.title}</Heading>
           <CategoryPreferences
             onToggleEditText={setIsEditing}
             categoryId={props.id}
