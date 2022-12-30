@@ -69,7 +69,7 @@ const List = (props: BookmarkGroup) => {
 
   return (
     <ListItem>
-      <HStack gap='$4' mb={'$1_5'}>
+      <HStack gap='$4' mb={'$4'}>
         <Show
           when={!isEditing()}
           fallback={

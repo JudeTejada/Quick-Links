@@ -18,7 +18,7 @@ function LinksList(props: LinkListProps) {
     console.log(isImageError(), 'isImageError');
   });
   return (
-    <List mb={'$6'} display='flex' gap={'$2'} alignItems='center' flexWrap='wrap'>
+    <List mb={'$6'} display='flex' gap={'$2'} alignItems='center' flexWrap='wrap' rowGap='$4'>
       <For each={props.list}>
         {(bookmark, i) => (
           <ListItem>
