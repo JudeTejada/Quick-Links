@@ -9,4 +9,4 @@ type BookmarkGroup = Database['public']['Tables']['bookmarks']['Row'] & {
 
 type CategoriesBookmark = BookmarkGroup[];
 
-export type { Bookmark, BookmarkGroup, CategoriesBookmark };
+export type { Bookmark, BookmarkGroup, CategoriesBookmark BookmarkList };

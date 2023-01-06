@@ -5,6 +5,7 @@ import App from './App';
 import { HopeProvider, NotificationsProvider } from '@hope-ui/solid';
 import { Router } from 'solid-app-router';
 import { StoreProvider } from './components/auth';
+import './index.css';
 
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,

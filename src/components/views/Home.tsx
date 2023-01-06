@@ -47,8 +47,6 @@ const Home: Component = () => {
           </BookmarkProvider>
         </Box>
       </Container>
-
-      
     </>
   );
 };

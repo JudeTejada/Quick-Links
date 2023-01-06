@@ -44,11 +44,7 @@ export const SignIn: Component = () => {
 
   return (
     <Box>
-      <Container
-        display='grid'
-        placeItems={'center'}
-        minHeight='100vh'
-      >
+      <Container display='grid' placeItems={'center'} minHeight='100vh'>
         <Box>
           <Box textAlign={'center'} mb='$4'>
             <Heading level='6' size='5xl' marginBottom='20px'>

@@ -13,7 +13,7 @@ import { createSupabase } from 'solid-supabase';
 import { useAuth } from '../auth';
 import { Input } from './Input';
 
-function AddNewBookmark(props: { categoryId: string }) {
+function AddNewBookmark(props: { categoryId: number }) {
   const supabase = createSupabase();
   const session = useAuth();
 

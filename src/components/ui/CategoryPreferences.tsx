@@ -1,6 +1,7 @@
 import {
   Button,
   createDisclosure,
+  Heading,
   Menu,
   MenuContent,
   MenuItem,
@@ -10,18 +11,24 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalFooter,
-  ModalOverlay
+  ModalHeader,
+  ModalOverlay,
+  Text
 } from '@hope-ui/solid';
 import { HiOutlineDotsHorizontal } from 'solid-icons/hi';
 import { BiSolidEdit } from 'solid-icons/bi';
+import { HiOutlineLink } from 'solid-icons/hi';
 import { HiOutlineTrash } from 'solid-icons/hi';
-import { createSignal } from 'solid-js';
+import { createSignal, Show } from 'solid-js';
 import { createSupabase } from 'solid-supabase';
+import type { BookmarkList } from '../../types';
 
 export function CategoryPreferences(props: {
-  categoryId: string;
+  categoryId: number;
   categoryTitle: string;
   onToggleEditText: (value: boolean) => void;
+  onToggleLinksEdit: (value: boolean) => void;
+  links: BookmarkList;
 }) {
   const { isOpen, onOpen, onClose } = createDisclosure();
 
@@ -59,13 +66,25 @@ export function CategoryPreferences(props: {
         >
           Edit
         </MenuTrigger>
+
         <MenuContent maxW={'$60'}>
           <MenuItem
+            colorScheme='success'
             icon={<BiSolidEdit />}
             onSelect={() => props.onToggleEditText(true)}
           >
-            Edit Title
+            Change Title
           </MenuItem>
+
+          <Show when={props.links?.length > 0}>
+            <MenuItem
+              colorScheme='primary'
+              icon={<HiOutlineLink />}
+              onSelect={() => props.onToggleLinksEdit(true)}
+            >
+              Edit Links
+            </MenuItem>
+          </Show>
           <MenuItem
             colorScheme='danger'
             icon={<HiOutlineTrash />}
@@ -79,10 +98,18 @@ export function CategoryPreferences(props: {
 
       <Modal centered opened={isOpen()} onClose={onClose}>
         <ModalOverlay />
+
         <ModalContent>
           <ModalCloseButton />
-          <ModalBody>
+
+          <ModalHeader>
             Are you sure you want to delete "{props.categoryTitle}" ?
+          </ModalHeader>
+          <ModalBody p='$4'>
+            <Text as='p'>
+              Deleting this means you won't be able to recover the content and
+              its links.
+            </Text>
           </ModalBody>
 
           <ModalFooter gap='$4'>

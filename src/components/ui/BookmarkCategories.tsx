@@ -1,5 +1,4 @@
 import {
-  Button,
   Flex,
   Heading,
   HStack,
@@ -8,7 +7,7 @@ import {
   notificationService,
   UnorderedList
 } from '@hope-ui/solid';
-import { createEffect, createSignal, For, Show } from 'solid-js';
+import { createEffect, createMemo, createSignal, For, Show } from 'solid-js';
 import { useBookmark } from '../../context/BookmarkProvider';
 import { HiOutlineX } from 'solid-icons/hi';
 import { LinksList } from './LinksList';
@@ -18,17 +17,25 @@ import { BookmarkGroup } from '../../types';
 import { Input } from './Input';
 import { useCurrentlyHeldKey } from '@solid-primitives/keyboard';
 import { createSupabase } from 'solid-supabase';
+import { TransitionGroup } from 'solid-transition-group';
 
 export function BookmarkCategories() {
-  const categories = useBookmark();
+  const [categories] = useBookmark();
 
   return (
-    <UnorderedList mb={'$8'}>
-      <For each={categories}>
-        {(cat, i) => (
-          <List title={cat.title} links={cat.links} id={cat.category_id} />
-        )}
-      </For>
+    <UnorderedList mb={'$8'} css={{ listStyle: 'none' }} ml={0}>
+      <TransitionGroup name='bookmark-item'>
+        <For each={categories}>
+          {(cat, i) => (
+            <List
+              title={cat.title}
+              links={cat.links}
+              category_id={cat.category_id}
+            />
+          )}
+        </For>
+      </TransitionGroup>
+
       <CreateNewCategory />
     </UnorderedList>
   );
@@ -36,16 +43,23 @@ export function BookmarkCategories() {
 
 const List = (props: BookmarkGroup) => {
   const [isEditing, setIsEditing] = createSignal(false);
-  const [isFocused, setIsFocused] = createSignal(false);
+  const [linksIsEditing, setIsLinksEditing] = createSignal(false);
   const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
+  const key = useCurrentlyHeldKey();
 
   const supabase = createSupabase();
 
   createEffect(() => {
-    inputElm()?.focus();
+    console.log(props.links);
   });
 
-  const key = useCurrentlyHeldKey();
+  createEffect(() => {
+    if (!props.links?.length && linksIsEditing()) setIsLinksEditing(false);
+  });
+
+  createEffect(() => {
+    inputElm()?.focus();
+  });
 
   createEffect(() => {
     if (key() === 'ESCAPE' && inputElm()) return setIsEditing(false);
@@ -55,7 +69,7 @@ const List = (props: BookmarkGroup) => {
     const { data, error } = await supabase
       .from('bookmarks')
       .update({ title: text })
-      .eq('id', props.id);
+      .eq('id', props.category_id);
 
     if (error)
       return notificationService.show({
@@ -68,7 +82,13 @@ const List = (props: BookmarkGroup) => {
   };
 
   return (
-    <ListItem>
+    <ListItem
+      className='bookmark-item'
+      outline={linksIsEditing() ? '2px solid  $primary10' : 'none'}
+      mb='$4'
+      p='$2_5'
+      borderRadius='$sm'
+    >
       <HStack gap='$4' mb={'$4'}>
         <Show
           when={!isEditing()}
@@ -80,10 +100,7 @@ const List = (props: BookmarkGroup) => {
                 errorText='please enter a category'
                 type='category'
                 onSuccessHandler={handleInputEnter}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
               />
-
               <IconButton
                 aria-label='close-icon'
                 onClick={() => setIsEditing(false)}
@@ -94,13 +111,19 @@ const List = (props: BookmarkGroup) => {
         >
           <Heading size='3xl'>{props.title}</Heading>
           <CategoryPreferences
+            links={props.links}
             onToggleEditText={setIsEditing}
-            categoryId={props.id}
+            onToggleLinksEdit={setIsLinksEditing}
+            categoryId={props.category_id}
             categoryTitle={props.title}
           />
         </Show>
       </HStack>
-      <LinksList list={props.links} categoryId={props.id} />
+      <LinksList
+        list={props.links}
+        categoryId={props.category_id}
+        isLinksEditing={linksIsEditing}
+      />
     </ListItem>
   );
 };

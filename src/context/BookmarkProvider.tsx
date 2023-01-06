@@ -10,15 +10,17 @@ import {
   Show,
   useContext
 } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createStore, SetStoreFunction, Store } from 'solid-js/store';
 import { createSupabase } from 'solid-supabase';
-import { useAuth } from '../components/auth';
 import { BookmarkLoader } from '../components/ui/BookmarkLoader';
 import { ErrorText } from '../components/ui/ErrorText';
 
 import type { Bookmark, BookmarkGroup, CategoriesBookmark } from '../types';
 
-const BookmarkContext = createContext<CategoriesBookmark>();
+const BookmarkContext =
+  createContext<
+    [Store<CategoriesBookmark>, SetStoreFunction<CategoriesBookmark>]
+  >();
 
 export const useBookmark = () => useContext(BookmarkContext)!;
 const getTodos = async () => {
@@ -74,7 +76,6 @@ export const BookmarkProvider: ParentComponent = props => {
             break;
           case 'DELETE': {
             const oldData = payload.old;
-            console.log(oldData);
             setCategories(state =>
               state.filter(
                 category => category.category_id !== payload.old.category_id
@@ -91,22 +92,14 @@ export const BookmarkProvider: ParentComponent = props => {
       .from<Bookmark>('links')
       .on('*', payload => {
         switch (payload.eventType) {
-          case 'INSERT':
-            {
-              const { category_id } = payload.new;
-              setCategories(
-                category => category.category_id === category_id,
-                'links',
-                bookmarks => [...bookmarks, { ...payload.new }]
-              );
-            }
-            break;
-          // case 'UPDATE':
-          //   setTodos(item => item.id === payload.new.id, payload.new);
-          //   break;
-          // case 'DELETE':
-          //   setTodos(prev => prev.filter(item => item.id != payload.old.id));
-          //   break;
+          case 'INSERT': {
+            const { category_id } = payload.new;
+            setCategories(
+              category => category.category_id === category_id,
+              'links',
+              bookmarks => [...bookmarks, { ...payload.new }]
+            );
+          }
         }
       })
       .subscribe();
@@ -118,7 +111,7 @@ export const BookmarkProvider: ParentComponent = props => {
   });
 
   return (
-    <BookmarkContext.Provider value={categories}>
+    <BookmarkContext.Provider value={[categories, setCategories]}>
       <ErrorBoundary
         fallback={<ErrorText text='something went wrong, sorry.' />}
       >
