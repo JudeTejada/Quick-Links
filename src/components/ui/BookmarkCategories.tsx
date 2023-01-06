@@ -1,4 +1,5 @@
 import {
+  Box,
   Flex,
   Heading,
   HStack,
@@ -7,17 +8,20 @@ import {
   notificationService,
   UnorderedList
 } from '@hope-ui/solid';
-import { createEffect, createMemo, createSignal, For, Show } from 'solid-js';
-import { useBookmark } from '../../context/BookmarkProvider';
-import { HiOutlineX } from 'solid-icons/hi';
-import { LinksList } from './LinksList';
-import { CreateNewCategory } from './AddNewCategory';
-import { CategoryPreferences } from './CategoryPreferences';
-import { BookmarkGroup } from '../../types';
-import { Input } from './Input';
+import { createEffect, createSignal, For, Show } from 'solid-js';
+import { HiOutlineX, HiSolidXCircle } from 'solid-icons/hi';
 import { useCurrentlyHeldKey } from '@solid-primitives/keyboard';
 import { createSupabase } from 'solid-supabase';
 import { TransitionGroup } from 'solid-transition-group';
+
+import { useBookmark } from '../../context/BookmarkProvider';
+
+import { LinksList } from './LinksList';
+import { CreateNewCategory } from './AddNewCategory';
+import { Input } from './Input';
+import { CategoryPreferences } from './CategoryPreferences';
+
+import type { BookmarkGroup } from '../../types';
 
 export function BookmarkCategories() {
   const [categories] = useBookmark();
@@ -50,10 +54,6 @@ const List = (props: BookmarkGroup) => {
   const supabase = createSupabase();
 
   createEffect(() => {
-    console.log(props.links);
-  });
-
-  createEffect(() => {
     if (!props.links?.length && linksIsEditing()) setIsLinksEditing(false);
   });
 
@@ -83,6 +83,7 @@ const List = (props: BookmarkGroup) => {
 
   return (
     <ListItem
+      position='relative'
       className='bookmark-item'
       outline={linksIsEditing() ? '2px solid  $primary10' : 'none'}
       mb='$4'
@@ -124,6 +125,19 @@ const List = (props: BookmarkGroup) => {
         categoryId={props.category_id}
         isLinksEditing={linksIsEditing}
       />
+
+      <Show when={linksIsEditing()}>
+        <Box
+          cursor='pointer'
+          position='absolute'
+          right='-13px'
+          top='-18px'
+          zIndex='40px'
+          onClick={() => setIsLinksEditing(false)}
+        >
+          <HiSolidXCircle color='#369EFF' size='25px' />
+        </Box>
+      </Show>
     </ListItem>
   );
 };

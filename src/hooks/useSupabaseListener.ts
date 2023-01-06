@@ -1,6 +1,6 @@
 import { notificationService } from '@hope-ui/solid';
 import { createRenderEffect } from 'solid-js';
-import { useNavigate } from 'solid-app-router';
+import { useNavigate } from '@solidjs/router';
 
 import { useAuth } from './../components/auth/userAuth';
 

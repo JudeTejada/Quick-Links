@@ -1,21 +1,15 @@
-import { Box, Spinner } from '@hope-ui/solid';
-import { Route, Routes, useLocation } from 'solid-app-router';
-import {
-  Component,
-  createEffect,
-  createRenderEffect,
-  createSignal
-} from 'solid-js';
+import { Route, Routes, useLocation } from '@solidjs/router';
+import { Component, createRenderEffect, createSignal } from 'solid-js';
 
 import { SignIn, useAuth } from './components/auth';
 
 import { Home } from './components/views';
+import { Page404 } from './components/views/404';
 import { useSupabaseListener } from './hooks';
 
 const App: Component = () => {
   useSupabaseListener();
   const session = useAuth();
-
 
   const [isLoading, setIsLoading] = createSignal(false);
   const location = useLocation();
@@ -29,6 +23,7 @@ const App: Component = () => {
     <Routes>
       <Route path='/' component={Home} />
       <Route path='/login' component={SignIn} />
+      <Route path='/*' component={Page404} />
     </Routes>
   );
 };

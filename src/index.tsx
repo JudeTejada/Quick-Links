@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { SupabaseProvider } from 'solid-supabase';
 import App from './App';
 import { HopeProvider, NotificationsProvider } from '@hope-ui/solid';
-import { Router } from 'solid-app-router';
+import { Router } from '@solidjs/router';
 import { StoreProvider } from './components/auth';
 import './index.css';
 

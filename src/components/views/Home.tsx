@@ -1,5 +1,5 @@
 import { Box, Button, Container, Flex, Heading, Spacer } from '@hope-ui/solid';
-import { Navigate } from 'solid-app-router';
+import { Navigate } from '@solidjs/router';
 import { Component } from 'solid-js';
 import { createSupabaseAuth } from 'solid-supabase';
 import { useOnlineStatus } from 'solid-use';

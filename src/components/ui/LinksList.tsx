@@ -1,5 +1,18 @@
-import { Box, Image, List, ListItem } from '@hope-ui/solid';
-import { Accessor, For, Show } from 'solid-js';
+import {
+  Box,
+  Image as HopeUiImage,
+  List,
+  ListItem,
+  Text
+} from '@hope-ui/solid';
+import {
+  Accessor,
+  createRenderEffect,
+  createSignal,
+  For,
+  onMount,
+  Show
+} from 'solid-js';
 import { HiSolidXCircle } from 'solid-icons/hi';
 import type { Bookmark } from '../../types';
 import { removeHttp } from '../../util';
@@ -53,7 +66,15 @@ interface BookmarkLink extends Bookmark {
 function BookmarkLink(props: BookmarkLink) {
   const supabase = createSupabase();
 
+  const [imageError, setImageError] = createSignal(false);
+
   const [_, setCategories] = useBookmark();
+
+  createRenderEffect(() => {
+    const img = new Image();
+    img.onload = () => {};
+    img.onerror = () => setImageError(true);
+  });
 
   const handleDeleteLink = async (linkId: string) => {
     const { data, error } = await supabase
@@ -88,18 +109,25 @@ function BookmarkLink(props: BookmarkLink) {
               handleDeleteLink(props.id);
             }}
           >
-            <HiSolidXCircle color='red' />
+            <HiSolidXCircle color='red' size={20} />
           </Box>
         </Show>
         <Show
-          when={true}
+          when={!imageError()}
           fallback={
-            <Box bg='red' boxSize='24px' borderRadius='$full'>
-              404
+            <Box
+              boxSize='24px'
+              borderRadius='$full'
+              display='grid'
+              placeItems='center'
+              color='white'
+              bg='#000'
+            >
+              <Text fontSize={10}>404</Text>
             </Box>
           }
         >
-          <Image
+          <HopeUiImage
             position='relative'
             zIndex='5'
             borderRadius={'$full'}

@@ -1,3 +1,4 @@
+import { Box, Text } from '@hope-ui/solid';
 import { RealtimeSubscription } from '@supabase/supabase-js';
 import {
   createContext,
@@ -13,7 +14,6 @@ import {
 import { createStore, SetStoreFunction, Store } from 'solid-js/store';
 import { createSupabase } from 'solid-supabase';
 import { BookmarkLoader } from '../components/ui/BookmarkLoader';
-import { ErrorText } from '../components/ui/ErrorText';
 
 import type { Bookmark, BookmarkGroup, CategoriesBookmark } from '../types';
 
@@ -113,7 +113,13 @@ export const BookmarkProvider: ParentComponent = props => {
   return (
     <BookmarkContext.Provider value={[categories, setCategories]}>
       <ErrorBoundary
-        fallback={<ErrorText text='something went wrong, sorry.' />}
+        fallback={
+          <Box bg='$danger4' p='$2'>
+            <Text>
+              Uh oh! It looks like you've stumbled upon an unforeseen issue.{' '}
+            </Text>
+          </Box>
+        }
       >
         <Show when={!data.loading} fallback={<BookmarkLoader />}>
           {props.children}
