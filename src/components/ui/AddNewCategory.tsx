@@ -7,10 +7,13 @@ import {
   PopoverTrigger
 } from '@hope-ui/solid';
 import { createSupabase } from 'solid-supabase';
-import { BookmarkGroup } from '../../types';
-import { Input } from './Input';
-import { useAuth } from '../auth';
 import { createEffect, createSignal } from 'solid-js';
+
+import type { AddNewBookmarkGroup, BookmarkCategory } from '../../types';
+
+import { Input } from './Input';
+
+import { useAuth } from '../auth';
 
 function AddNewCategory() {
   const session = useAuth();
@@ -23,14 +26,18 @@ function AddNewCategory() {
   });
 
   const handleInputEnter = async (title: string) => {
-    const { data, error } = await supabase
-      .from<BookmarkGroup>('bookmarks')
+    const { data, error, status } = await supabase
+      .from<BookmarkCategory, AddNewBookmarkGroup>('bookmarks')
       .insert({
+        // @ts-ignore
         title,
         user_id: session()?.user?.id
-      });
+      })
+      .select();
 
-      if(data) inputElm()?.blur();
+    console.log(data, 'data');
+
+    if (data) inputElm()?.blur();
 
     if (error) {
       console.error(error);

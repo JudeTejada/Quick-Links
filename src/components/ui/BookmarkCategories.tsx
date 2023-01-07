@@ -30,7 +30,7 @@ export function BookmarkCategories() {
     <UnorderedList mb={'$8'} css={{ listStyle: 'none' }} ml={0}>
       <TransitionGroup name='bookmark-item'>
         <For each={categories}>
-          {(cat, i) => (
+          {cat => (
             <List
               title={cat.title}
               links={cat.links}
@@ -54,6 +54,7 @@ const List = (props: BookmarkGroup) => {
   const supabase = createSupabase();
 
   createEffect(() => {
+    console.log(props.category_id);
     if (!props.links?.length && linksIsEditing()) setIsLinksEditing(false);
   });
 
@@ -70,7 +71,8 @@ const List = (props: BookmarkGroup) => {
     const { data, error } = await supabase
       .from('bookmarks')
       .update({ title: text })
-      .eq('id', props.category_id);
+      .match({ category_id: props.category_id })
+      .select();
 
     if (error)
       return notificationService.show({

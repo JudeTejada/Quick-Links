@@ -11,28 +11,29 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@types/uuid": "^8.3.4",
+    "@types/uuid": "^9.0.0",
     "babel-plugin-solid-undestructure": "^1.1.0",
-    "eslint": "^8.19.0",
-    "eslint-plugin-solid": "^0.7.1",
-    "supabase": ">=1.8.1",
-    "typescript": "^4.6.4",
+    "eslint": "^8.31.0",
+    "eslint-plugin-solid": "^0.9.1",
+    "supabase": "^1.29.2",
+    "typescript": "^4.9.4",
     "undestructure-macros": "^0.0.1",
-    "vite": "^2.9.9",
-    "vite-plugin-solid": "^2.2.6"
+    "vite": "^4.0.4",
+    "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
-    "@hope-ui/solid": "^0.6.2",
+    "@hope-ui/solid": "^0.6.7",
     "@solid-primitives/keyboard": "^1.0.5",
+    "@solidjs/router": "^0.6.0",
     "@stitches/core": "^1.2.8",
-    "@supabase/supabase-js": "^1.35.4",
-    "@solidjs/router": "^0.4.1",
-    "solid-icons": "^1.0.1",
-    "solid-js": "^1.4.2",
-    "solid-supabase": "^0.2.7",
-    "solid-transition-group": "^0.0.10",
-    "solid-use": "^0.5.0",
-    "uuid": "^8.3.2"
+    "@supabase/supabase-js": "^2.2.3",
+    "js-cookie": "^3.0.1",
+    "solid-icons": "^1.0.4",
+    "solid-js": "^1.6.8",
+    "solid-supabase": "^0.3.2",
+    "solid-transition-group": "^0.0.12",
+    "solid-use": "^0.6.2",
+    "uuid": "^9.0.0"
   },
   "proxy": "https://besticon.herokuapp.com"
 }

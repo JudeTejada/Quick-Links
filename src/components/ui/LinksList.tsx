@@ -80,10 +80,11 @@ function BookmarkLink(props: BookmarkLink) {
   });
 
   const handleDeleteLink = async (linkId: string) => {
-    const { data, error } = await supabase
+    const { error, data } = await supabase
       .from('links')
       .delete()
-      .match({ id: linkId });
+      .eq('id', linkId)
+      .select();
 
     if (data) {
       setCategories(

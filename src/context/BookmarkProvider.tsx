@@ -1,5 +1,5 @@
 import { Box, Text } from '@hope-ui/solid';
-import { RealtimeSubscription } from '@supabase/supabase-js';
+import { type RealtimeChannel } from '@supabase/supabase-js';
 import {
   createContext,
   createEffect,
@@ -57,51 +57,58 @@ export const BookmarkProvider: ParentComponent = props => {
       setCategories(returnedValue);
     }
   });
-  let categoriesSubscription: RealtimeSubscription | null;
-  let bookmarkSubscription: RealtimeSubscription | null;
+  let categoriesSubscription: RealtimeChannel | null;
+  let bookmarkSubscription: RealtimeChannel | null;
 
   onMount(() => {
     categoriesSubscription = supabase
-      .from<BookmarkGroup>('bookmarks')
-      .on('*', payload => {
-        switch (payload.eventType) {
-          case 'INSERT':
-            setCategories([...categories, payload.new]);
-            break;
-          case 'UPDATE':
-            setCategories(
-              category => category.id === payload.new.id,
-              payload.new
-            );
-            break;
-          case 'DELETE': {
-            const oldData = payload.old;
-            setCategories(state =>
-              state.filter(
-                category => category.category_id !== payload.old.category_id
-              )
-            );
+      .channel('public:bookmarks')
+      .on<BookmarkGroup>(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookmarks' },
+        payload => {
+          switch (payload.eventType) {
+            case 'INSERT':
+              setCategories([...categories, payload.new]);
+              break;
+            case 'UPDATE':
+              setCategories(
+                category => category.category_id === payload.new.category_id,
+                payload.new
+              );
+              break;
+            case 'DELETE': {
+              setCategories(state =>
+                state.filter(
+                  category => category.category_id !== payload.old.category_id
+                )
+              );
 
-            break;
+              break;
+            }
           }
         }
-      })
+      )
       .subscribe();
 
-    bookmarkSubscription = supabase
-      .from<Bookmark>('links')
-      .on('*', payload => {
-        switch (payload.eventType) {
-          case 'INSERT': {
-            const { category_id } = payload.new;
-            setCategories(
-              category => category.category_id === category_id,
-              'links',
-              bookmarks => [...bookmarks, { ...payload.new }]
-            );
+    categoriesSubscription = supabase
+      .channel('public:links')
+      .on<Bookmark>(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'links' },
+        payload => {
+          switch (payload.eventType) {
+            case 'INSERT': {
+              const { category_id } = payload.new;
+              setCategories(
+                category => category.category_id === category_id,
+                'links',
+                bookmarks => [...bookmarks, { ...payload.new }]
+              );
+            }
           }
         }
-      })
+      )
       .subscribe();
   });
 
