@@ -9,7 +9,7 @@ import {
   UnorderedList
 } from '@hope-ui/solid';
 import { createEffect, createSignal, For, Show } from 'solid-js';
-import { HiOutlineX, HiSolidXCircle } from 'solid-icons/hi';
+import { HiOutlineX, HiSolidX, HiSolidXCircle } from 'solid-icons/hi';
 import { useCurrentlyHeldKey } from '@solid-primitives/keyboard';
 import { createSupabase } from 'solid-supabase';
 import { TransitionGroup } from 'solid-transition-group';
@@ -63,6 +63,7 @@ const List = (props: BookmarkGroup) => {
 
   createEffect(() => {
     if (key() === 'ESCAPE' && inputElm()) return setIsEditing(false);
+    if (key() === 'ESCAPE' && linksIsEditing()) return setIsLinksEditing(false);
   });
 
   const handleInputEnter = async (text: string) => {
@@ -112,6 +113,7 @@ const List = (props: BookmarkGroup) => {
         >
           <Heading size='3xl'>{props.title}</Heading>
           <CategoryPreferences
+            islinksEditing={linksIsEditing}
             links={props.links}
             onToggleEditText={setIsEditing}
             onToggleLinksEdit={setIsLinksEditing}
@@ -135,7 +137,14 @@ const List = (props: BookmarkGroup) => {
           zIndex='40px'
           onClick={() => setIsLinksEditing(false)}
         >
-          <HiSolidXCircle color='#369EFF' size='25px' />
+          <IconButton
+            icon={<HiSolidX size='25px' color='white' />}
+            bg='#369EFF'
+            aria-label='close-icon'
+            maxW={25}
+            maxH={25}
+            borderRadius='$full'
+          />
         </Box>
       </Show>
     </ListItem>

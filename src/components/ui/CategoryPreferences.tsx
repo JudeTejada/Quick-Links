@@ -19,13 +19,14 @@ import { HiOutlineDotsHorizontal } from 'solid-icons/hi';
 import { BiSolidEdit } from 'solid-icons/bi';
 import { HiOutlineLink } from 'solid-icons/hi';
 import { HiOutlineTrash } from 'solid-icons/hi';
-import { createSignal, Show } from 'solid-js';
+import { Accessor, createSignal, Show } from 'solid-js';
 import { createSupabase } from 'solid-supabase';
 import type { BookmarkList } from '../../types';
 
 export function CategoryPreferences(props: {
   categoryId: number;
   categoryTitle: string;
+  islinksEditing: Accessor<Boolean>;
   onToggleEditText: (value: boolean) => void;
   onToggleLinksEdit: (value: boolean) => void;
   links: BookmarkList;
@@ -52,10 +53,18 @@ export function CategoryPreferences(props: {
     }
   };
 
+  const handleLinksToggle = () => {
+    const menuTrigger = document.getElementById('categoryMenuTrigger')?.blur();
+
+    document.getElementById('categoryMenuTrigger')?.blur();
+    props.onToggleLinksEdit(!props.islinksEditing());
+  };
+
   return (
     <>
       <Menu>
         <MenuTrigger
+          id='categoryMenuTrigger'
           as={HiOutlineDotsHorizontal}
           _active={{
             boxShadow: '$outline'
@@ -63,9 +72,7 @@ export function CategoryPreferences(props: {
           _focus={{
             boxShadow: '$outline'
           }}
-        >
-          Edit
-        </MenuTrigger>
+        />
 
         <MenuContent maxW={'$60'}>
           <MenuItem
@@ -80,9 +87,9 @@ export function CategoryPreferences(props: {
             <MenuItem
               colorScheme='primary'
               icon={<HiOutlineLink />}
-              onSelect={() => props.onToggleLinksEdit(true)}
+              onSelect={handleLinksToggle}
             >
-              Edit Links
+              {props.islinksEditing() ? 'Cancel edit links' : 'Edit Links'}
             </MenuItem>
           </Show>
           <MenuItem

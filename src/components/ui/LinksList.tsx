@@ -1,5 +1,7 @@
 import {
+  Anchor,
   Box,
+  IconButton,
   Image as HopeUiImage,
   List,
   ListItem,
@@ -10,16 +12,17 @@ import {
   createRenderEffect,
   createSignal,
   For,
-  onMount,
   Show
 } from 'solid-js';
-import { HiSolidXCircle } from 'solid-icons/hi';
+import { HiSolidX, HiSolidXCircle } from 'solid-icons/hi';
 import type { Bookmark } from '../../types';
 import { removeHttp } from '../../util';
 import { CreateBookmark } from './AddNewBookmark';
 import { createSupabase } from 'solid-supabase';
 import { useBookmark } from '../../context/BookmarkProvider';
 import { TransitionGroup } from 'solid-transition-group';
+
+import { Icon } from '@hope-ui/solid';
 
 interface LinkListProps {
   list: Bookmark[];
@@ -95,50 +98,61 @@ function BookmarkLink(props: BookmarkLink) {
   };
 
   return (
-    <ListItem position='relative' className='list-item'>
-      <a href={props.url} target='_blank'>
-        <Show when={props.isLinksEditing()}>
+    <ListItem
+      as={Anchor}
+      href={props.url}
+      target='_blank'
+      external
+      position='relative'
+      className='list-item'
+      borderRadius='$full'
+    >
+      <Show when={props.isLinksEditing()}>
+        <IconButton
+          maxW={16}
+          maxH={16}
+          aria-label='Delete current link'
+          icon={<HiSolidX size={16} />}
+          colorScheme='danger'
+          pos='absolute'
+          right='-5px'
+          top='-5px'
+          zIndex={10}
+          borderRadius='$full'
+          onClick={(e: any) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleDeleteLink(props.id);
+          }}
+        />
+      </Show>
+      <Show
+        when={!imageError()}
+        fallback={
           <Box
-            position='absolute'
-            right='-5px'
-            top='-5px'
-            zIndex='40'
-            onClick={(e: any) => {
-              e.stopPropagation();
-              e.preventDefault();
-              handleDeleteLink(props.id);
-            }}
+            boxSize='24px'
+            borderRadius='$full'
+            display='grid'
+            placeItems='center'
+            color='white'
+            bg='#000'
           >
-            <HiSolidXCircle color='red' size={20} />
+            <Text fontSize={10}>404</Text>
           </Box>
-        </Show>
-        <Show
-          when={!imageError()}
-          fallback={
-            <Box
-              boxSize='24px'
-              borderRadius='$full'
-              display='grid'
-              placeItems='center'
-              color='white'
-              bg='#000'
-            >
-              <Text fontSize={10}>404</Text>
-            </Box>
-          }
-        >
-          <HopeUiImage
-            position='relative'
-            zIndex='5'
-            borderRadius={'$full'}
-            boxSize={props.isLinksEditing() ? '34px' : '24px'}
-            src={`https://icon.horse/icon/${removeHttp(props.url)}`}
-            alt={props.url}
-            objectFit='cover'
-          />
-        </Show>
-      </a>
+        }
+      >
+        <HopeUiImage
+          position='relative'
+          zIndex='5'
+          borderRadius={'$full'}
+          boxSize={props.isLinksEditing() ? '34px' : '24px'}
+          src={`https://icon.horse/icon/${removeHttp(props.url)}`}
+          alt={props.url}
+          objectFit='cover'
+        />
+      </Show>
     </ListItem>
+    // </ListItem>
   );
 }
 

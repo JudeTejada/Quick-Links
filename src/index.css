@@ -8,10 +8,18 @@
 }
 
 .list-item {
-  transition: all 0.5s;
+  transition: all 200ms;
 }
 
 .list-item-enter,
 .list-item-exit-to {
   opacity: 0;
+}
+.close-link-icon:after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  inset: 0;
+  background: white;
 }
