@@ -1,9 +1,10 @@
+/* global chrome */
+
 import { type Session } from '@supabase/supabase-js';
-import { useNavigate } from 'solid-app-router';
+import { useNavigate } from '@solidjs/router';
 import {
   Accessor,
   createContext,
-  createEffect,
   createSignal,
   ParentComponent,
   useContext
@@ -17,16 +18,12 @@ export const useAuth = () => useContext(StoreContext)!;
 export const StoreProvider: ParentComponent = props => {
   const [session, setSession] = createSignal<Session | null>(null);
 
-  const auth = createSupabaseAuth();
   const navigate = useNavigate();
-
-  createEffect(() => {
-    setSession(auth.session());
-  });
 
   createOnAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN') {
       setSession(session);
+
       navigate('/', { replace: true });
     }
     if (event === 'SIGNED_OUT') {

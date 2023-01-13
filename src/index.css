@@ -1,0 +1,25 @@
+.bookmark-item {
+  transition: all 200ms;
+}
+
+.bookmark-item-enter,
+.bookmark-item-exit-to {
+  opacity: 0;
+}
+
+.list-item {
+  transition: all 200ms;
+}
+
+.list-item-enter,
+.list-item-exit-to {
+  opacity: 0;
+}
+.close-link-icon:after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  inset: 0;
+  background: white;
+}

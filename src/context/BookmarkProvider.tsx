@@ -1,74 +1,43 @@
-import { Box, Flex, SkeletonCircle, SkeletonText } from '@hope-ui/solid';
+import { Box, Text } from '@hope-ui/solid';
+import { type RealtimeChannel } from '@supabase/supabase-js';
 import {
   createContext,
   createEffect,
   createResource,
+  ErrorBoundary,
+  onCleanup,
+  onMount,
   ParentComponent,
+  Show,
   useContext
 } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createStore, SetStoreFunction, Store } from 'solid-js/store';
 import { createSupabase } from 'solid-supabase';
-import { v4 as uuidv4 } from 'uuid';
+import { BookmarkLoader } from '../components/ui/BookmarkLoader';
 
-import type { AddNewBookmark, CategoriesBookmark } from '../types';
+import type { Bookmark, BookmarkGroup, CategoriesBookmark } from '../types';
 
-type BookmarkContextType = [
-  CategoriesBookmark,
-  {
-    addNewCategory: (value: string) => void;
-    addNewBookmark: (values: AddNewBookmark) => void;
-  }
-];
-const BookmarkContext = createContext<BookmarkContextType>();
+const BookmarkContext =
+  createContext<
+    [Store<CategoriesBookmark>, SetStoreFunction<CategoriesBookmark>]
+  >();
 
 export const useBookmark = () => useContext(BookmarkContext)!;
-
-const SkeletonLoader = () => {
-  return (
-    <Box>
-      <Box>
-        <SkeletonText
-          mt='$4'
-          width={'200px'}
-          noOfLines={1}
-          spacing='$4'
-          mb='$1_5'
-        />
-        <Flex mb='$6' gap='$2'>
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-        </Flex>
-      </Box>
-      <Box>
-        <SkeletonText
-          mt='$4'
-          width={'200px'}
-          noOfLines={1}
-          spacing='$4'
-          mb='$1_5'
-        />
-        <Flex mb='$6' gap='$2'>
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-        </Flex>
-      </Box>
-    </Box>
-  );
-};
-
 const getTodos = async () => {
   const supabase = createSupabase();
-  const { data, error } = await supabase.from<CategoriesBookmark>('category')
-    .select(`
-      id, title,
-      bookmarks (
-       category_id
+
+  const { data, error } = await supabase
+    .from<CategoriesBookmark>('bookmarks')
+    .select(
+      `
+      category_id,
+      title,
+      links (
+       url,
+       id
       )
-      `);
+      `
+    );
 
   if (error) {
     throw error;
@@ -78,43 +47,91 @@ const getTodos = async () => {
 };
 
 export const BookmarkProvider: ParentComponent = props => {
+  const supabase = createSupabase();
   const [categories, setCategories] = createStore<CategoriesBookmark>([]);
   const [data] = createResource(getTodos);
 
   createEffect(() => {
     const returnedValue = data();
-    console.log(returnedValue, 'returnedValue');
     if (returnedValue) {
-      console.log("🚀 ~ file: BookmarkProvider.tsx ~ line 87 ~ createEffect ~ returnedValue", returnedValue)
       setCategories(returnedValue);
     }
   });
+  let categoriesSubscription: RealtimeChannel | null;
+  let bookmarkSubscription: RealtimeChannel | null;
 
-  const addNewCategory = (category: string) => {
-    let newCategory = {
-      title: category,
-      id: uuidv4(),
-      bookmarks: []
-    };
-    setCategories([...categories, newCategory]);
-  };
+  onMount(() => {
+    categoriesSubscription = supabase
+      .channel('public:bookmarks')
+      .on<BookmarkGroup>(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookmarks' },
+        payload => {
+          switch (payload.eventType) {
+            case 'INSERT':
+              setCategories([...categories, payload.new]);
+              break;
+            case 'UPDATE':
+              setCategories(
+                category => category.category_id === payload.new.category_id,
+                payload.new
+              );
+              break;
+            case 'DELETE': {
+              setCategories(state =>
+                state.filter(
+                  category => category.category_id !== payload.old.category_id
+                )
+              );
 
-  const addNewBookmark = ({ url, categoryId }: AddNewBookmark) => {
-    setCategories(
-      category => category.id === categoryId,
-      'bookmarks',
-      bookmarks => [...bookmarks, { id: uuidv4(), url }]
-    );
-  };
+              break;
+            }
+          }
+        }
+      )
+      .subscribe();
 
-  const values: BookmarkContextType = [
-    categories,
-    { addNewCategory, addNewBookmark }
-  ];
+    categoriesSubscription = supabase
+      .channel('public:links')
+      .on<Bookmark>(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'links' },
+        payload => {
+          switch (payload.eventType) {
+            case 'INSERT': {
+              const { category_id } = payload.new;
+              setCategories(
+                category => category.category_id === category_id,
+                'links',
+                bookmarks => [...bookmarks, { ...payload.new }]
+              );
+            }
+          }
+        }
+      )
+      .subscribe();
+  });
+
+  onCleanup(() => {
+    categoriesSubscription?.unsubscribe();
+    bookmarkSubscription?.unsubscribe();
+  });
 
   return (
-    <BookmarkContext.Provider value={values}>
-      {data.loading ? <SkeletonLoader /> : props.children}
+    <BookmarkContext.Provider value={[categories, setCategories]}>
+      <ErrorBoundary
+        fallback={
+          <Box bg='$danger4' p='$2'>
+            <Text>
+              Uh oh! It looks like you've stumbled upon an unforeseen issue.{' '}
+            </Text>
+          </Box>
+        }
+      >
+        <Show when={!data.loading} fallback={<BookmarkLoader />}>
+          {props.children}
+        </Show>
+      </ErrorBoundary>
     </BookmarkContext.Provider>
   );
 };

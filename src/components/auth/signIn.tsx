@@ -22,7 +22,7 @@ export const SignIn: Component = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await auth.signIn({ email: email() });
+      const { error } = await auth.signInWithOtp({ email: email() });
       if (error) throw error;
       setIsLoading(false);
       notificationService.show({
