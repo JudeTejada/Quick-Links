@@ -1,8 +1,8 @@
 import { Route, Routes, useLocation } from '@solidjs/router';
 import { Component, createRenderEffect, createSignal } from 'solid-js';
-import { MetaProvider, Title, Link, Meta } from '@solidjs/meta';
 
 import { SignIn, useAuth } from './components/auth';
+import { Seo } from './components/lib/Seo';
 
 import { Home } from './components/views';
 import { Page404 } from './components/views/404';
