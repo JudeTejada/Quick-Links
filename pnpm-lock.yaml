@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@hope-ui/solid': ^0.6.7
   '@solid-primitives/keyboard': ^1.0.5
+  '@solidjs/meta': ^0.28.2
   '@solidjs/router': ^0.6.0
   '@stitches/core': ^1.2.8
   '@supabase/supabase-js': ^2.2.3
@@ -26,6 +27,7 @@ specifiers:
 dependencies:
   '@hope-ui/solid': 0.6.7_wynslk3ozn63oshmuot33sjkq4
   '@solid-primitives/keyboard': 1.0.5_solid-js@1.6.8
+  '@solidjs/meta': 0.28.2_solid-js@1.6.8
   '@solidjs/router': 0.6.0_solid-js@1.6.8
   '@stitches/core': 1.2.8
   '@supabase/supabase-js': 2.2.3
@@ -753,6 +755,14 @@ packages:
     resolution: {integrity: sha512-fGsJy8Z8YiwogpiezD7TWjI62UCb0JAHJWdoXWGrggrn4bfToZotKkabiB0IVFMkWVE1ZcrkvZT3bkmqGnK0ng==}
     peerDependencies:
       solid-js: ^1.6.0
+    dependencies:
+      solid-js: 1.6.8
+    dev: false
+
+  /@solidjs/meta/0.28.2_solid-js@1.6.8:
+    resolution: {integrity: sha512-avlLgBPdk4KVxzRGFlYp/MIJo8B5jVgXPgk6OUnUP8km21Z+ovO+DUd7ZPA7ejv8PBdWi9GE3zCzw8RU2YuV2Q==}
+    peerDependencies:
+      solid-js: '>=1.4.0'
     dependencies:
       solid-js: 1.6.8
     dev: false
