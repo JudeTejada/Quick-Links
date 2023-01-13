@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
+    "start": "node init && vite",
+    "dev": "node init && vite",
+    "build": "node init && vite build",
     "serve": "vite preview",
     "generate-types": "npx supabase gen types typescript --project-id cwocwsdipdkszcmwhtvj --schema public > src/types/supabase.ts"
   },
@@ -24,10 +24,13 @@
   "dependencies": {
     "@hope-ui/solid": "^0.6.7",
     "@solid-primitives/keyboard": "^1.0.5",
+    "@solidjs/meta": "^0.28.2",
     "@solidjs/router": "^0.6.0",
     "@stitches/core": "^1.2.8",
     "@supabase/supabase-js": "^2.2.3",
+    "dotenv": "^8.2.0",
     "js-cookie": "^3.0.1",
+    "node-fetch": "^3.3.2",
     "solid-icons": "^1.0.4",
     "solid-js": "^1.6.8",
     "solid-supabase": "^0.3.2",
