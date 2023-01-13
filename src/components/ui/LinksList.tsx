@@ -14,15 +14,13 @@ import {
   For,
   Show
 } from 'solid-js';
-import { HiSolidX, HiSolidXCircle } from 'solid-icons/hi';
+import { HiSolidX } from 'solid-icons/hi';
 import type { Bookmark } from '../../types';
 import { removeHttp } from '../../util';
 import { CreateBookmark } from './AddNewBookmark';
 import { createSupabase } from 'solid-supabase';
 import { useBookmark } from '../../context/BookmarkProvider';
 import { TransitionGroup } from 'solid-transition-group';
-
-import { Icon } from '@hope-ui/solid';
 
 interface LinkListProps {
   list: Bookmark[];
