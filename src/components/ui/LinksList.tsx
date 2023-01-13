@@ -7,13 +7,7 @@ import {
   ListItem,
   Text
 } from '@hope-ui/solid';
-import {
-  Accessor,
-  createRenderEffect,
-  createSignal,
-  For,
-  Show
-} from 'solid-js';
+import { Accessor, createSignal, For, Show } from 'solid-js';
 import { HiSolidX } from 'solid-icons/hi';
 import type { Bookmark } from '../../types';
 import { removeHttp } from '../../util';
@@ -70,12 +64,6 @@ function BookmarkLink(props: BookmarkLink) {
   const [imageError, setImageError] = createSignal(false);
 
   const [_, setCategories] = useBookmark();
-
-  createRenderEffect(() => {
-    const img = new Image();
-    img.onload = () => {};
-    img.onerror = () => setImageError(true);
-  });
 
   const handleDeleteLink = async (linkId: string) => {
     const { error, data } = await supabase
@@ -146,6 +134,7 @@ function BookmarkLink(props: BookmarkLink) {
           borderRadius={'$full'}
           boxSize={props.isLinksEditing() ? '34px' : '24px'}
           src={`https://icon.horse/icon/${removeHttp(props.url)}`}
+          onerror={() => setImageError(true)}
           alt={props.url}
           objectFit='cover'
         />

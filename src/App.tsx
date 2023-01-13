@@ -21,20 +21,15 @@ const App: Component = () => {
   });
 
   return (
-    <MetaProvider>
-      <Title>Quick Links</Title>
-      <Meta charset='utf-8' />
-      <Meta
-        name='description'
-        content='Manage and save bookmarks. built with Solid'
-      />
-      <Link rel='manifest' href='/manifest.webmanifest' />
+    <>
+      <Seo />
+
       <Routes>
         <Route path='/' component={Home} />
         <Route path='/login' component={SignIn} />
         <Route path='/*' component={Page404} />
       </Routes>
-    </MetaProvider>
+    </>
   );
 };
 

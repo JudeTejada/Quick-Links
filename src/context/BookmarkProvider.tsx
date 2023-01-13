@@ -103,7 +103,7 @@ export const BookmarkProvider: ParentComponent = props => {
               setCategories(
                 category => category.category_id === category_id,
                 'links',
-                bookmarks => [...bookmarks, { ...payload.new }]
+                links => [...links, { ...payload.new }]
               );
             }
           }

@@ -32,7 +32,7 @@ const Home: Component = () => {
         <Flex alignItems={'center'}>
           <Box>
             <Heading size={'3xl'} mb='$1'>
-              Solid marks
+              Quick Links
             </Heading>
             <Heading size='base' color='$blackAlpha11'>
               {session()?.user?.email}
