@@ -54,7 +54,6 @@ const List = (props: BookmarkGroup) => {
   const supabase = createSupabase();
 
   createEffect(() => {
-    console.log(props.category_id);
     if (!props.links?.length && linksIsEditing()) setIsLinksEditing(false);
   });
 
