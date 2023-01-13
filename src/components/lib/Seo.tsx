@@ -1,9 +1,8 @@
-import { Title } from '@solidjs/meta';
-import { Component } from 'solid-js';
+import { MetaProvider, Title } from '@solidjs/meta';
 
 import seoImage from '../../assets/banner.png';
 
-export function Seo(props: Component) {
+export function Seo() {
   const meta = {
     title: 'Quick Links',
     description: 'Manage and save  your  bookmarks. built with Solid',
@@ -12,7 +11,7 @@ export function Seo(props: Component) {
   };
 
   return (
-    <>
+    <MetaProvider>
       <Title>{meta.title}</Title>
       <meta charset='utf-8' />
       <meta name='robots' content='follow, index' />
@@ -59,6 +58,6 @@ export function Seo(props: Component) {
       />
       <link rel='manifest' href='/src/assets/logo/site.webmanifest' />
       <title>Quick Links</title>
-    </>
+    </Metap>
   );
 }

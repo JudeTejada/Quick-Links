@@ -1,3 +1,4 @@
+import { MetaProvider } from '@solidjs/meta';
 import { Route, Routes, useLocation } from '@solidjs/router';
 import { Component, createRenderEffect, createSignal } from 'solid-js';
 
