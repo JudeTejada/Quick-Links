@@ -26,6 +26,7 @@ export function Seo() {
       <meta property='og:description' content={meta.description} />
       <meta property='og:title' content={meta.title} />
       <meta property='og:image' content={meta.image} />
+      <meta property='og:url' content='https://quick-links-solid.vercel.app' />
 
       {/*  twitter*/}
       <meta name='twitter:card' content='summary_large_image' />
