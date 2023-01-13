@@ -35,7 +35,6 @@ function AddNewCategory() {
       })
       .select();
 
-    console.log(data, 'data');
 
     if (data) inputElm()?.blur();
 
