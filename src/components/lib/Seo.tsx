@@ -58,6 +58,6 @@ export function Seo() {
       />
       <link rel='manifest' href='/src/assets/logo/site.webmanifest' />
       <title>Quick Links</title>
-    </Metap>
+    </MetaProvider>
   );
 }
