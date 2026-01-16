@@ -1,103 +1,81 @@
-import {
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input as HopeUiInput
-} from '@hope-ui/solid';
-import { useCurrentlyHeldKey } from '@solid-primitives/keyboard';
-import { createSignal, onMount, Show } from 'solid-js';
-import { isUrl } from '../../util';
+'use client';
 
-type InputType = 'category' | 'bookmark';
-interface InputProps {
-  type: InputType;
-  errorText: string;
-  inputType?: string;
-  label?: string;
-  text?: string;
-  placeholder?: string;
-  id?: string;
-  ref?: HTMLInputElement | ((el: HTMLInputElement) => void) | undefined;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  onSuccessHandler: (text: string) => void;
-}
+import { Field as FieldPrimitive } from '@base-ui/react/field';
+import { mergeProps } from '@base-ui/react/merge-props';
+import * as React from 'react';
 
-const validateInput = (text: string, type: InputType) => {
-  if (!text) return true;
+import { cn } from '@/lib/utils';
 
-  if (type === 'bookmark' && !isUrl(text)) return true;
-
-  return false;
+type InputProps = React.ComponentProps<'input'> & {
+  size?: 'sm' | 'default' | 'lg' | number;
+  unstyled?: boolean;
+  nativeInput?: boolean;
 };
 
-const getFormattedValue = (text: string, type: InputType) => {
-  if (type === 'bookmark') {
-    text = text.replaceAll('https://', '').replaceAll('http://', '');
+const Input = React.forwardRef<HTMLInputElement, InputProps>(function Input(
+  { className, size = 'default', unstyled = false, nativeInput = false, ...props },
+  ref,
+) {
+  const inputClassName = cn(
+    'h-8.5 w-full min-w-0 rounded-[inherit] bg-transparent px-[calc(--spacing(3)-1px)] leading-8.5 outline-none',
+    size === 'sm' && 'h-7.5 px-[calc(--spacing(2.5)-1px)] leading-7.5',
+    size === 'lg' && 'h-9.5 leading-9.5',
+  );
 
-    let newInputValue = `https://${text}`;
-
-    return newInputValue;
+  if (nativeInput) {
+    return (
+      <input
+        className={cn(inputClassName, className)}
+        data-size={typeof size === 'string' ? size : undefined}
+        data-slot="input"
+        ref={ref}
+        {...props}
+      />
+    );
   }
 
-  return text;
-};
-
-export function Input(props: InputProps) {
-  const [text, setText] = createSignal(props.text || '');
-  const [isError, setIsError] = createSignal(false);
-  const key = useCurrentlyHeldKey();
-
-  onMount(() => {
-    if (props.type === 'bookmark') setText('https://');
-  });
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    const isError = validateInput(text(), props.type);
-    if (event.key === 'Enter') {
-      isError ? setIsError(true) : props.onSuccessHandler(text());
-    }
-  };
-
-  const handleInput = (event: InputEvent) => {
-    setIsError(false);
-    const element = event.target as HTMLInputElement;
-
-    if (
-      props.type === 'bookmark' &&
-      key() === 'BACKSPACE' &&
-      text().endsWith('https://')
-    )
-      return setText('https://');
-
-    let inputValue = getFormattedValue(element.value, props.type);
-    setText(inputValue);
-  };
-
   return (
-    <>
-      <FormControl>
-        <Show when={props.label}>
-          <FormLabel for={props.label}>{props.label}</FormLabel>
-        </Show>
+    <span
+      className={
+        cn(
+          !unstyled &&
+            'relative inline-flex w-full rounded-lg border border-input bg-background not-dark:bg-clip-padding text-base shadow-xs/5 ring-ring/24 transition-shadow before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] has-focus-visible:has-aria-invalid:border-destructive/64 has-focus-visible:has-aria-invalid:ring-destructive/16 has-aria-invalid:border-destructive/36 has-focus-visible:border-ring has-disabled:opacity-64 has-[:disabled,:focus-visible,[aria-invalid]]:shadow-none has-focus-visible:ring-[3px] not-has-disabled:has-not-focus-visible:not-has-aria-invalid:before:shadow-[0_1px_--theme(--color-black/6%)] sm:text-sm dark:bg-input/32 dark:has-aria-invalid:ring-destructive/24 dark:not-has-disabled:has-not-focus-visible:not-has-aria-invalid:before:shadow-[0_-1px_--theme(--color-white/6%)]',
+          className,
+        ) || undefined
+      }
+      data-size={size}
+      data-slot="input-control"
+    >
+      <FieldPrimitive.Control
+        render={(defaultProps) => {
+          const { ref: defaultRef, ...restDefaultProps } = defaultProps;
+          const mergedProps = mergeProps(restDefaultProps, props);
+          const composedRef = (node: HTMLInputElement | null) => {
+            if (typeof defaultRef === 'function') {
+              defaultRef(node);
+            } else if (defaultRef) {
+              (defaultRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
+            }
 
-        <HopeUiInput
-          ref={props.ref}
-          placeholder={props.placeholder}
-          id={props.label}
-          type={props.inputType || 'text'}
-          value={text()}
-          onInput={handleInput}
-          onkeydown={handleKeyDown}
-          onfocus={props.onFocus}
-          onBlur={props.onBlur}
-          invalid={isError()}
-        />
+            if (typeof ref === 'function') {
+              ref(node);
+            } else if (ref) {
+              (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
+            }
+          };
 
-        <Show when={isError()} fallback={null}>
-          <FormHelperText color={'$danger9'}>{props.errorText}</FormHelperText>
-        </Show>
-      </FormControl>
-    </>
+          return (
+            <input
+              className={inputClassName}
+              data-slot="input"
+              ref={composedRef}
+              {...mergedProps}
+            />
+          );
+        }}
+      />
+    </span>
   );
-}
+});
+
+export { Input, type InputProps };

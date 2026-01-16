@@ -1,83 +1,70 @@
-import {
-  Button,
-  FormControl,
-  notificationService,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger
-} from '@hope-ui/solid';
-import { createEffect, createSignal } from 'solid-js';
-import { createSupabase } from 'solid-supabase';
+import React, { useEffect, useRef, useState } from 'react';
+import { useMutation } from 'convex/react';
+
+import { api } from '../../../convex/_generated/api';
+import { notify } from '../../lib/notify';
 import { useAuth } from '../auth';
-import { Input } from './Input';
+import type { CategoryId } from '../../types';
+import { Button } from './button';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { QuickLinksInput } from './QuickLinksInput';
 
-function AddNewBookmark(props: { categoryId: number }) {
-  const supabase = createSupabase();
-  const session = useAuth();
+export function CreateBookmark({ categoryId }: { categoryId: CategoryId }) {
+  const { user } = useAuth();
+  const createLink = useMutation(api.links.create);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
-
-  createEffect(() => {
-    inputElm()?.focus();
-  });
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
 
   const handleEnter = async (text: string) => {
-    const { data, error } = await supabase.from('links').insert({
-      url: text,
-      category_id: props.categoryId,
-      user_id: session()?.user?.id
-    });
-    if (error)
-      return notificationService.show({
+    if (!user) return;
+
+    try {
+      await createLink({
+        url: text,
+        categoryId,
+        userId: user.id,
+      });
+      inputRef.current?.blur();
+      setIsOpen(false);
+    } catch (error) {
+      notify({
         status: 'danger',
         title: 'Error!',
-        description: 'failed to add a new bookmark'
+        description: 'failed to add a new bookmark',
       });
-
-    if (data) {
-      const bodyElm = document.getElementsByTagName('BODY')[0];
-
-      inputElm()?.blur();
     }
   };
 
   return (
-    <>
-      <Popover
-        closeOnBlur
-        triggerMode='click'
-        placement='top-start'
-        initialFocus='#category'
-      >
-        <PopoverTrigger
-          as={Button}
-          variant='subtle'
-          colorScheme='neutral'
-          size='sm'
-        >
-          New+
-        </PopoverTrigger>
-        <PopoverContent>
-          <PopoverArrow />
-          <PopoverBody>
-            <FormControl>
-              <Input
-                ref={setInputElm}
-                errorText='invalid url'
-                type='bookmark'
-                placeholder='https://www.google.com/'
-                id='category'
-                inputType='url'
-                onSuccessHandler={handleEnter}
-              />
-            </FormControl>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    </>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="secondary"
+            size="xs"
+            className="h-6 rounded-md px-2.5 text-xs font-semibold text-slate-600 shadow-none hover:bg-slate-200"
+          >
+            New+
+          </Button>
+        }
+      />
+      <PopoverContent side="top" align="start" className="w-80">
+        <QuickLinksInput
+          inputRef={inputRef}
+          errorText="invalid url"
+          type="bookmark"
+          placeholder="https://www.google.com/"
+          id="category"
+          inputType="url"
+          onSuccessHandler={handleEnter}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
-
-export { AddNewBookmark as CreateBookmark };

@@ -1,37 +1,27 @@
-import { Box, Flex, SkeletonCircle, SkeletonText } from '@hope-ui/solid';
+import React from 'react';
 
-export const BookmarkLoader = () => {
+import { Skeleton } from './skeleton';
+
+export function BookmarkLoader() {
   return (
-    <Box>
-      <Box>
-        <SkeletonText
-          mt='$4'
-          width={'200px'}
-          noOfLines={1}
-          spacing='$4'
-          mb='$1_5'
-        />
-        <Flex mb='$6' gap='$2'>
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-        </Flex>
-      </Box>
-      <Box>
-        <SkeletonText
-          mt='$4'
-          width={'200px'}
-          noOfLines={1}
-          spacing='$4'
-          mb='$1_5'
-        />
-        <Flex mb='$6' gap='$2'>
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-          <SkeletonCircle size='$10' />
-        </Flex>
-      </Box>
-    </Box>
+    <div className="flex flex-col gap-6">
+      <div>
+        <Skeleton className="h-3 w-48 rounded-md" />
+        <div className="mt-3 flex gap-2">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-9 w-9 rounded-full" />
+        </div>
+      </div>
+      <div>
+        <Skeleton className="h-3 w-48 rounded-md" />
+        <div className="mt-3 flex gap-2">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <Skeleton className="h-9 w-9 rounded-full" />
+        </div>
+      </div>
+    </div>
   );
-};
+}

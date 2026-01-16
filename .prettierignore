@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+.output
+.nitro
+.tanstack
+.vinxi
+.wrangler
+coverage
+convex/_generated
+*.log
+*.local
+.env
+.env.*
+!.env.example
+.DS_Store
+package-lock.json

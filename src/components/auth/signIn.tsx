@@ -1,85 +1,65 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  FormLabel,
-  Heading,
-  Input,
-  notificationService,
-  Text
-} from '@hope-ui/solid';
-import { Component, createSignal } from 'solid-js';
-import { createSupabaseAuth } from 'solid-supabase';
+import React, { useState } from 'react';
 
-export const SignIn: Component = () => {
-  const auth = createSupabaseAuth();
+import { notify } from '../../lib/notify';
+import { useAuth } from './AuthProvider';
+import { Button } from '../ui/button';
+import { Field, FieldLabel } from '../ui/field';
+import { Input } from '../ui/input';
 
-  const [email, setEmail] = createSignal('');
-  const [isLoading, setIsLoading] = createSignal(false);
+export function SignIn() {
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async e => {
-    e.preventDefault();
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await auth.signInWithOtp({ email: email() });
-      if (error) throw error;
-      setIsLoading(false);
-      notificationService.show({
+      await signIn(email);
+
+      notify({
         status: 'success',
         title: 'Success',
-        description: 'Check your email for the magic link sent!'
+        description: 'You are now signed in.',
       });
       setEmail('');
     } catch (error: any) {
-      setIsLoading(false);
-
-      notificationService.show({
-        status: 'danger' /* or success, warning, danger */,
+      notify({
+        status: 'danger',
         title: 'Something went wrong',
-        description: error.error_description || error.message
+        description: error?.message || 'Unable to sign in.',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Box>
-      <Container display='grid' placeItems={'center'} minHeight='100vh'>
-        <Box>
-          <Box textAlign={'center'} mb='$4'>
-            <Heading level='6' size='5xl' marginBottom='20px'>
-              Welcome
-            </Heading>
-            <Text size='base'>Easily sign in with using a magic link.</Text>
-          </Box>
-          <form onSubmit={handleLogin}>
-            <Flex alignItems={'center'}>
-              <Box alignItems={'center'}>
-                <FormLabel for='email'>Email address</FormLabel>
-                <Input
-                  id='email'
-                  placeholder='johndoe@gmail.com'
-                  type='email'
-                  value={email()}
-                  oninput={e => {
-                    setEmail(e.target.value);
-                  }}
-                />
-                <Button
-                  width={'$full'}
-                  textAlign={'center'}
-                  type='submit'
-                  colorScheme='primary'
-                  marginTop={'20px'}
-                  loading={isLoading()}
-                >
-                  Sign in
-                </Button>
-              </Box>
-            </Flex>
+    <div className="min-h-screen bg-gradient-to-br from-[#d4e7d2] via-[#e2f0de] to-[#c7dcc5] p-6">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-5xl items-center justify-center">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5">
+          <div className="text-center">
+            <h1 className="font-display text-3xl text-slate-900">Welcome</h1>
+            <p className="mt-2 text-sm text-slate-500">Easily sign in with using a magic link.</p>
+          </div>
+          <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
+            <Field>
+              <FieldLabel htmlFor="email">Email address</FieldLabel>
+              <Input
+                id="email"
+                placeholder="johndoe@gmail.com"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </Field>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </Button>
           </form>
-        </Box>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
-};
+}

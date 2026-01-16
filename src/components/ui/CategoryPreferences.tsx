@@ -1,136 +1,99 @@
+import React, { useState } from 'react';
+import { Ellipsis, Link2, Trash2 } from 'lucide-react';
+import { useMutation } from 'convex/react';
+
+import { api } from '../../../convex/_generated/api';
+import type { BookmarkList, CategoryId } from '../../types';
+import { useAuth } from '../auth';
+import { Button } from './button';
 import {
-  Button,
-  createDisclosure,
-  Heading,
-  Menu,
-  MenuContent,
-  MenuItem,
-  MenuTrigger,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Text
-} from '@hope-ui/solid';
-import { HiOutlineDotsHorizontal } from 'solid-icons/hi';
-import { BiSolidEdit } from 'solid-icons/bi';
-import { HiOutlineLink } from 'solid-icons/hi';
-import { HiOutlineTrash } from 'solid-icons/hi';
-import { Accessor, createSignal, Show } from 'solid-js';
-import { createSupabase } from 'solid-supabase';
-import type { BookmarkList } from '../../types';
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogClose,
+} from './alert-dialog';
+import { Menu, MenuItem, MenuPopup, MenuTrigger } from './menu';
 
 export function CategoryPreferences(props: {
-  categoryId: number;
+  categoryId: CategoryId;
   categoryTitle: string;
-  islinksEditing: Accessor<Boolean>;
-  onToggleEditText: (value: boolean) => void;
+  isLinksEditing: boolean;
   onToggleLinksEdit: (value: boolean) => void;
   links: BookmarkList;
 }) {
-  const { isOpen, onOpen, onClose } = createDisclosure();
-
-  const supabase = createSupabase();
-  const [isLoading, setIsLoading] = createSignal(false);
+  const { user } = useAuth();
+  const removeCategory = useMutation(api.bookmarks.remove);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .delete()
-      .match({ category_id: props.categoryId });
+    if (!user) return;
 
-    if (data) {
+    setIsLoading(true);
+    try {
+      await removeCategory({ userId: user.id, categoryId: props.categoryId });
+    } catch (error) {
+       
+      console.error(error);
+    } finally {
       setIsLoading(false);
-      onClose();
-    }
-    if (error) {
-      onClose();
-      console.log(error);
+      setIsDialogOpen(false);
     }
   };
 
   const handleLinksToggle = () => {
-    const menuTrigger = document.getElementById('categoryMenuTrigger')?.blur();
-
-    document.getElementById('categoryMenuTrigger')?.blur();
-    props.onToggleLinksEdit(!props.islinksEditing());
+    props.onToggleLinksEdit(!props.isLinksEditing);
   };
 
   return (
-    <>
+    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Menu>
         <MenuTrigger
-          id='categoryMenuTrigger'
-          as={HiOutlineDotsHorizontal}
-          _active={{
-            boxShadow: '$outline'
-          }}
-          _focus={{
-            boxShadow: '$outline'
-          }}
-        />
-
-        <MenuContent maxW={'$60'}>
-          <MenuItem
-            colorScheme='success'
-            icon={<BiSolidEdit />}
-            onSelect={() => props.onToggleEditText(true)}
-          >
-            Change Title
-          </MenuItem>
-
-          <Show when={props.links?.length > 0}>
-            <MenuItem
-              colorScheme='primary'
-              icon={<HiOutlineLink />}
-              onSelect={handleLinksToggle}
+          render={
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="h-6 w-6 rounded-md border-transparent shadow-none text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              aria-label="Category options"
             >
-              {props.islinksEditing() ? 'Cancel edit links' : 'Edit Links'}
+              <Ellipsis size={18} />
+            </Button>
+          }
+        />
+        <MenuPopup align="start" className="min-w-[180px]">
+          {props.links?.length ? (
+            <MenuItem onClick={handleLinksToggle}>
+              <Link2 size={16} />
+              {props.isLinksEditing ? 'Cancel edit links' : 'Edit Links'}
             </MenuItem>
-          </Show>
-          <MenuItem
-            colorScheme='danger'
-            icon={<HiOutlineTrash />}
-            disabled={isLoading()}
-            onSelect={onOpen}
-          >
+          ) : null}
+
+          <MenuItem variant="destructive" onClick={() => setIsDialogOpen(true)}>
+            <Trash2 size={16} />
             Delete category
           </MenuItem>
-        </MenuContent>
+        </MenuPopup>
       </Menu>
 
-      <Modal centered opened={isOpen()} onClose={onClose}>
-        <ModalOverlay />
-
-        <ModalContent>
-          <ModalCloseButton />
-
-          <ModalHeader>
-            Are you sure you want to delete "{props.categoryTitle}" ?
-          </ModalHeader>
-          <ModalBody p='$4'>
-            <Text as='p'>
-              Deleting this means you won't be able to recover the content and
-              its links.
-            </Text>
-          </ModalBody>
-
-          <ModalFooter gap='$4'>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button
-              colorScheme='danger'
-              onClick={handleDelete}
-              loading={isLoading()}
-            >
-              Confirm
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Are you sure you want to delete "{props.categoryTitle}"?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Deleting this means you won't be able to recover the content and its links.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogClose render={<Button variant="outline">Cancel</Button>} />
+          <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
+            {isLoading ? 'Deleting...' : 'Confirm'}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

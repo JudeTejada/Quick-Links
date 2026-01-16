@@ -1,153 +1,184 @@
-import {
-  Box,
-  Flex,
-  Heading,
-  HStack,
-  IconButton,
-  ListItem,
-  notificationService,
-  UnorderedList
-} from '@hope-ui/solid';
-import { createEffect, createSignal, For, Show } from 'solid-js';
-import { HiOutlineX, HiSolidX, HiSolidXCircle } from 'solid-icons/hi';
-import { useCurrentlyHeldKey } from '@solid-primitives/keyboard';
-import { createSupabase } from 'solid-supabase';
-import { TransitionGroup } from 'solid-transition-group';
+import React, { useEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
+import { useMutation } from 'convex/react';
 
 import { useBookmark } from '../../context/BookmarkProvider';
-
 import { LinksList } from './LinksList';
 import { CreateNewCategory } from './AddNewCategory';
-import { Input } from './Input';
 import { CategoryPreferences } from './CategoryPreferences';
-
-import type { BookmarkGroup } from '../../types';
+import type { BookmarkList, CategoryId } from '../../types';
+import { notify } from '../../lib/notify';
+import { api } from '../../../convex/_generated/api';
+import { useAuth } from '../auth';
+import { Button } from './button';
+import { Input } from './input';
 
 export function BookmarkCategories() {
-  const [categories] = useBookmark();
+  const { categories } = useBookmark();
 
   return (
-    <UnorderedList mb={'$8'} css={{ listStyle: 'none' }} ml={0}>
-      <TransitionGroup name='bookmark-item'>
-        <For each={categories}>
-          {cat => (
-            <List
-              title={cat.title}
-              links={cat.links}
-              category_id={cat.category_id}
-            />
-          )}
-        </For>
-      </TransitionGroup>
+    <ul className="list-none space-y-5 p-0">
+      {categories.map((category) => (
+        <CategoryItem
+          key={category._id}
+          title={category.title}
+          links={category.links}
+          categoryId={category._id}
+        />
+      ))}
 
-      <CreateNewCategory />
-    </UnorderedList>
+      <li className="pt-2">
+        <CreateNewCategory />
+      </li>
+    </ul>
   );
 }
 
-const List = (props: BookmarkGroup) => {
-  const [isEditing, setIsEditing] = createSignal(false);
-  const [linksIsEditing, setIsLinksEditing] = createSignal(false);
-  const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
-  const key = useCurrentlyHeldKey();
+interface CategoryItemProps {
+  categoryId: CategoryId;
+  title: string;
+  links: BookmarkList;
+}
 
-  const supabase = createSupabase();
+function CategoryItem(props: CategoryItemProps) {
+  const { user } = useAuth();
+  const updateTitle = useMutation(api.bookmarks.updateTitle);
+  const [isEditing, setIsEditing] = useState(false);
+  const [linksIsEditing, setLinksIsEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(props.title);
+  const [isSaving, setIsSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  createEffect(() => {
-    if (!props.links?.length && linksIsEditing()) setIsLinksEditing(false);
-  });
+  useEffect(() => {
+    if (!props.links?.length && linksIsEditing) setLinksIsEditing(false);
+  }, [linksIsEditing, props.links?.length]);
 
-  createEffect(() => {
-    inputElm()?.focus();
-  });
+  useEffect(() => {
+    if (isEditing) {
+      setDraftTitle(props.title);
+      inputRef.current?.focus();
+    }
+  }, [isEditing]);
 
-  createEffect(() => {
-    if (key() === 'ESCAPE' && inputElm()) return setIsEditing(false);
-    if (key() === 'ESCAPE' && linksIsEditing()) return setIsLinksEditing(false);
-  });
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (isEditing) {
+        setDraftTitle(props.title);
+        setIsEditing(false);
+      }
+      if (linksIsEditing) setLinksIsEditing(false);
+    };
 
-  const handleInputEnter = async (text: string) => {
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .update({ title: text })
-      .match({ category_id: props.category_id })
-      .select();
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isEditing, linksIsEditing]);
 
-    if (error)
-      return notificationService.show({
+  useEffect(() => {
+    if (!isEditing) {
+      setDraftTitle(props.title);
+    }
+  }, [isEditing, props.title]);
+
+  const commitTitle = async (text: string) => {
+    if (!user) return;
+    if (isSaving) return;
+
+    const trimmedTitle = text.trim();
+    if (!trimmedTitle) {
+      notify({
         status: 'danger',
         title: 'Error!',
-        description: 'failed to edit existing category title'
+        description: 'please enter a category',
       });
+      return;
+    }
 
-    if (data) return setIsEditing(false);
+    if (trimmedTitle === props.title) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateTitle({
+        title: trimmedTitle,
+        categoryId: props.categoryId,
+        userId: user.id,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      notify({
+        status: 'danger',
+        title: 'Error!',
+        description: 'failed to edit existing category title',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <ListItem
-      position='relative'
-      className='bookmark-item'
-      outline={linksIsEditing() ? '2px solid  $primary10' : 'none'}
-      mb='$4'
-      p='$2_5'
-      borderRadius='$sm'
-    >
-      <HStack gap='$4' mb={'$4'}>
-        <Show
-          when={!isEditing()}
-          fallback={
-            <Flex gap='$4'>
-              <Input
-                ref={setInputElm}
-                text={props.title}
-                errorText='please enter a category'
-                type='category'
-                onSuccessHandler={handleInputEnter}
-              />
-              <IconButton
-                aria-label='close-icon'
-                onClick={() => setIsEditing(false)}
-                icon={<HiOutlineX />}
-              />
-            </Flex>
-          }
-        >
-          <Heading size='3xl'>{props.title}</Heading>
-          <CategoryPreferences
-            islinksEditing={linksIsEditing}
-            links={props.links}
-            onToggleEditText={setIsEditing}
-            onToggleLinksEdit={setIsLinksEditing}
-            categoryId={props.category_id}
-            categoryTitle={props.title}
+    <li className="relative rounded-xl p-3 transition-all duration-200">
+      <div className="flex items-center gap-2">
+        {isEditing ? (
+          <Input
+            ref={inputRef}
+            nativeInput
+            className="h-9 w-56 rounded-md border border-transparent bg-transparent px-1 text-2xl font-semibold text-slate-900 focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-100"
+            value={draftTitle}
+            onChange={(event) => setDraftTitle(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                commitTitle(draftTitle);
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                setDraftTitle(props.title);
+                setIsEditing(false);
+              }
+            }}
+            onBlur={() => commitTitle(draftTitle)}
           />
-        </Show>
-      </HStack>
-      <LinksList
-        list={props.links}
-        categoryId={props.category_id}
-        isLinksEditing={linksIsEditing}
-      />
+        ) : (
+          <>
+            <button
+              type="button"
+              className="text-2xl font-semibold text-slate-900 transition-colors hover:text-slate-700"
+              onClick={() => setIsEditing(true)}
+            >
+              {props.title}
+            </button>
+            <CategoryPreferences
+              isLinksEditing={linksIsEditing}
+              links={props.links}
+              onToggleLinksEdit={setLinksIsEditing}
+              categoryId={props.categoryId}
+              categoryTitle={props.title}
+            />
+          </>
+        )}
+      </div>
 
-      <Show when={linksIsEditing()}>
-        <Box
-          cursor='pointer'
-          position='absolute'
-          right='-13px'
-          top='-18px'
-          zIndex='40px'
-          onClick={() => setIsLinksEditing(false)}
+      <div className="mt-3">
+        <LinksList
+          list={props.links}
+          categoryId={props.categoryId}
+          isLinksEditing={linksIsEditing}
+        />
+      </div>
+
+      {linksIsEditing ? (
+        <Button
+          variant="default"
+          size="icon-xs"
+          className="absolute -top-3 left-1/2 h-7 w-7 -translate-x-1/2 rounded-full border-transparent bg-[#369EFF] text-white shadow-md hover:bg-[#2D8BE4]"
+          onClick={() => setLinksIsEditing(false)}
         >
-          <IconButton
-            icon={<HiSolidX size='25px' color='white' />}
-            bg='#369EFF'
-            aria-label='close-icon'
-            maxW={25}
-            maxH={25}
-            borderRadius='$full'
-          />
-        </Box>
-      </Show>
-    </ListItem>
+          <X size={16} />
+        </Button>
+      ) : null}
+    </li>
   );
-};
+}

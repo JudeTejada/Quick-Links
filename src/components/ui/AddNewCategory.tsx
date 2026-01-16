@@ -1,69 +1,58 @@
-import {
-  Button,
-  FormControl,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger
-} from '@hope-ui/solid';
-import { createSupabase } from 'solid-supabase';
-import { createEffect, createSignal } from 'solid-js';
+import React, { useEffect, useRef, useState } from 'react';
+import { useMutation } from 'convex/react';
 
-import type { AddNewBookmarkGroup, BookmarkCategory } from '../../types';
-
-import { Input } from './Input';
-
+import { api } from '../../../convex/_generated/api';
 import { useAuth } from '../auth';
+import { Button } from './button';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { QuickLinksInput } from './QuickLinksInput';
 
-function AddNewCategory() {
-  const session = useAuth();
-  const supabase = createSupabase();
+export function CreateNewCategory() {
+  const { user } = useAuth();
+  const createCategory = useMutation(api.bookmarks.create);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [inputElm, setInputElm] = createSignal<HTMLInputElement>();
-
-  createEffect(() => {
-    inputElm()?.focus();
-  });
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
 
   const handleInputEnter = async (title: string) => {
-    const { data, error, status } = await supabase
-      .from<BookmarkCategory, AddNewBookmarkGroup>('bookmarks')
-      .insert({
-        // @ts-ignore
+    if (!user) return;
+
+    try {
+      await createCategory({
         title,
-        user_id: session()?.user?.id
-      })
-      .select();
-
-
-    if (data) inputElm()?.blur();
-
-    if (error) {
+        userId: user.id,
+      });
+      setIsOpen(false);
+    } catch (error) {
+       
       console.error(error);
     }
   };
 
   return (
-    <>
-      <Popover closeOnBlur placement='top-start' initialFocus='#category'>
-        <PopoverTrigger as={Button}>Add new category</PopoverTrigger>
-        <PopoverContent>
-          <PopoverBody>
-            <FormControl>
-              <Input
-                ref={setInputElm}
-                placeholder='Social'
-                id='category'
-                errorText='please enter a category'
-                type='category'
-                onSuccessHandler={handleInputEnter}
-              />
-            </FormControl>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-    </>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger
+        render={
+          <Button className="border-transparent bg-[#0EA5B7] text-white shadow-sm hover:bg-[#0B8EA0]">
+            Add new category
+          </Button>
+        }
+      />
+      <PopoverContent side="top" align="start" className="w-72">
+        <QuickLinksInput
+          inputRef={inputRef}
+          placeholder="Social"
+          id="category"
+          errorText="please enter a category"
+          type="category"
+          onSuccessHandler={handleInputEnter}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
-
-export { AddNewCategory as CreateNewCategory };

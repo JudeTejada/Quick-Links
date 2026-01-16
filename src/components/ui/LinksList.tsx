@@ -1,147 +1,97 @@
-import {
-  Anchor,
-  Box,
-  IconButton,
-  Image as HopeUiImage,
-  List,
-  ListItem,
-  Text
-} from '@hope-ui/solid';
-import { Accessor, createSignal, For, Show } from 'solid-js';
-import { HiSolidX } from 'solid-icons/hi';
-import type { Bookmark } from '../../types';
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+import { useMutation } from 'convex/react';
+
+import type { Bookmark, CategoryId } from '../../types';
 import { removeHttp } from '../../util';
 import { CreateBookmark } from './AddNewBookmark';
-import { createSupabase } from 'solid-supabase';
-import { useBookmark } from '../../context/BookmarkProvider';
-import { TransitionGroup } from 'solid-transition-group';
+import { api } from '../../../convex/_generated/api';
+import { useAuth } from '../auth';
+import { Button } from './button';
 
 interface LinkListProps {
   list: Bookmark[];
-  categoryId: number;
-  isLinksEditing: Accessor<Boolean>;
+  categoryId: CategoryId;
+  isLinksEditing: boolean;
 }
 
-function LinksList(props: LinkListProps) {
+export function LinksList(props: LinkListProps) {
   return (
-    <List
-      display='flex'
-      gap={'$2'}
-      alignItems='center'
-      flexWrap='wrap'
-      rowGap='$4'
-    >
-      <TransitionGroup name='list-item'>
-        <For each={props.list}>
-          {(bookmark, i) => (
-            // @ts-ignore
-            <BookmarkLink
-              id={bookmark.id}
-              url={bookmark.url}
-              category_id={props.categoryId}
-              isLinksEditing={props.isLinksEditing}
-            />
-          )}
-        </For>
-      </TransitionGroup>
+    <ul className="list-none flex flex-wrap items-center gap-x-2 gap-y-4 p-0">
+      {props.list.map((bookmark) => (
+        <BookmarkLink
+          key={bookmark._id}
+          {...bookmark}
+          categoryId={props.categoryId}
+          isLinksEditing={props.isLinksEditing}
+        />
+      ))}
 
-      {!props.isLinksEditing() && (
-        <ListItem>
+      {!props.isLinksEditing ? (
+        <li>
           <CreateBookmark categoryId={props.categoryId} />
-        </ListItem>
-      )}
-    </List>
+        </li>
+      ) : null}
+    </ul>
   );
 }
 
-interface BookmarkLink extends Bookmark {
-  isLinksEditing: Accessor<Boolean>;
+interface BookmarkLinkProps extends Bookmark {
+  isLinksEditing: boolean;
+  categoryId: CategoryId;
 }
 
-function BookmarkLink(props: BookmarkLink) {
-  const supabase = createSupabase();
+function BookmarkLink(props: BookmarkLinkProps) {
+  const [imageError, setImageError] = useState(false);
+  const { user } = useAuth();
+  const removeLink = useMutation(api.links.remove);
+  const iconSizeClass = props.isLinksEditing ? 'h-[34px] w-[34px]' : 'h-6 w-6';
 
-  const [imageError, setImageError] = createSignal(false);
+  const handleDeleteLink = async (linkId: Bookmark['_id']) => {
+    if (!user) return;
 
-  const [_, setCategories] = useBookmark();
-
-  const handleDeleteLink = async (linkId: string) => {
-    const { error, data } = await supabase
-      .from('links')
-      .delete()
-      .eq('id', linkId)
-      .select();
-
-    if (data) {
-      setCategories(
-        category => category.category_id === props.category_id,
-        'links',
-        bookmarks => bookmarks.filter(link => link.id !== linkId)
-      );
-    }
-    if (error) {
-      console.log(error);
+    try {
+      await removeLink({ userId: user.id, linkId });
+    } catch (error) {
+       
+      console.error(error);
     }
   };
 
   return (
-    <ListItem
-      as={Anchor}
-      href={props.url}
-      target='_blank'
-      external
-      position='relative'
-      className='list-item'
-      borderRadius='$full'
-    >
-      <Show when={props.isLinksEditing()}>
-        <IconButton
-          maxW={16}
-          maxH={16}
-          aria-label='Delete current link'
-          icon={<HiSolidX size={16} />}
-          colorScheme='danger'
-          pos='absolute'
-          right='-5px'
-          top='-5px'
-          zIndex={10}
-          borderRadius='$full'
-          onClick={(e: any) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleDeleteLink(props.id);
-          }}
-        />
-      </Show>
-      <Show
-        when={!imageError()}
-        fallback={
-          <Box
-            boxSize='24px'
-            borderRadius='$full'
-            display='grid'
-            placeItems='center'
-            color='white'
-            bg='#000'
+    <li className="relative">
+      <a href={props.url} target="_blank" rel="noreferrer" className="inline-flex items-center">
+        {props.isLinksEditing ? (
+          <Button
+            variant="destructive"
+            size="icon-xs"
+            className="absolute -right-1 -top-1 h-4 w-4 rounded-full border-transparent p-0 text-white shadow-sm"
+            aria-label="Delete current link"
+            onClick={(event) => {
+              event.stopPropagation();
+              event.preventDefault();
+              handleDeleteLink(props._id);
+            }}
           >
-            <Text fontSize={10}>404</Text>
-          </Box>
-        }
-      >
-        <HopeUiImage
-          position='relative'
-          zIndex='5'
-          borderRadius={'$full'}
-          boxSize={props.isLinksEditing() ? '34px' : '24px'}
-          src={`https://icon.horse/icon/${removeHttp(props.url)}`}
-          onerror={() => setImageError(true)}
-          alt={props.url}
-          objectFit='cover'
-        />
-      </Show>
-    </ListItem>
-    // </ListItem>
+            <X size={10} />
+          </Button>
+        ) : null}
+
+        {!imageError ? (
+          <img
+            className={`${iconSizeClass} rounded-full object-cover`}
+            src={`https://icon.horse/icon/${removeHttp(props.url)}`}
+            onError={() => setImageError(true)}
+            alt={props.url}
+          />
+        ) : (
+          <span
+            className={`${iconSizeClass} grid place-items-center rounded-full bg-black text-[10px] text-white`}
+          >
+            404
+          </span>
+        )}
+      </a>
+    </li>
   );
 }
-
-export { LinksList };
