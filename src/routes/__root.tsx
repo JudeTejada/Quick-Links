@@ -1,8 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
-import { ConvexProvider } from 'convex/react';
+import { ConvexAuthProvider } from '@convex-dev/auth/react';
 
 import appCss from '../styles.css?url';
-import { AuthProvider } from '../components/auth';
 import { Page404 } from '../components/views/Page404';
 import { convex } from '../lib/convex';
 import { ToastProvider } from '../components/ui/toast';
@@ -118,13 +117,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="relative">
-        <ConvexProvider client={convex}>
-          <AuthProvider>
-            <ToastProvider position="bottom-right">
-              <div className="isolate relative flex min-h-svh flex-col">{children}</div>
-            </ToastProvider>
-          </AuthProvider>
-        </ConvexProvider>
+        <ConvexAuthProvider client={convex}>
+          <ToastProvider position="bottom-right">
+            <div className="isolate relative flex min-h-svh flex-col">{children}</div>
+          </ToastProvider>
+        </ConvexAuthProvider>
         <Scripts />
       </body>
     </html>

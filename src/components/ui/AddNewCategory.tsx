@@ -1,14 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useMutation } from 'convex/react';
+import { useEffect, useRef, useState } from 'react';
+import { useConvexAuth, useMutation } from 'convex/react';
 
 import { api } from '../../../convex/_generated/api';
-import { useAuth } from '../auth';
 import { Button } from './button';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { QuickLinksInput } from './QuickLinksInput';
 
 export function CreateNewCategory() {
-  const { user } = useAuth();
+  const { isAuthenticated } = useConvexAuth();
   const createCategory = useMutation(api.bookmarks.create);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -20,16 +19,14 @@ export function CreateNewCategory() {
   }, [isOpen]);
 
   const handleInputEnter = async (title: string) => {
-    if (!user) return;
+    if (!isAuthenticated) return;
 
     try {
       await createCategory({
         title,
-        userId: user.id,
       });
       setIsOpen(false);
     } catch (error) {
-       
       console.error(error);
     }
   };

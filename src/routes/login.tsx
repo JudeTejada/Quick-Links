@@ -1,21 +1,22 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useConvexAuth } from 'convex/react';
 
-import { SignIn, useAuth } from '../components/auth';
+import { SignIn } from '@/components/auth/SignIn';
 
 export const Route = createFileRoute('/login')({
   component: Login,
 });
 
 function Login() {
-  const { user, isLoading } = useAuth();
+  const { isLoading, isAuthenticated } = useConvexAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && isAuthenticated) {
       navigate({ to: '/' });
     }
-  }, [isLoading, navigate, user]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   return <SignIn />;
 }

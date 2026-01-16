@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Skeleton } from './skeleton';
 
 export function BookmarkLoader() {

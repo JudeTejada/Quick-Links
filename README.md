@@ -25,6 +25,21 @@ This project uses [Vitest](https://vitest.dev/) for testing. You can run the tes
 npm run test
 ```
 
+## Authentication (Convex Auth)
+
+This project uses Convex Auth with magic links via Resend. Configure the following
+environment variables in your Convex deployment:
+
+- `SITE_URL` (for example `http://localhost:3000` during local development)
+- `JWT_PRIVATE_KEY` and `JWKS` (generate with the Convex Auth manual setup guide)
+- `AUTH_RESEND_KEY` (your Resend API key)
+- `AUTH_EMAIL` (optional sender address, defaults to Resend onboarding address)
+
+Generate `JWT_PRIVATE_KEY`/`JWKS` once per deployment and keep them stable; rotating
+the keys will invalidate existing sessions and force users to sign in again.
+
+See https://labs.convex.dev/auth/setup/manual for generating keys and setting env vars.
+
 ## Styling
 
 This project uses CSS for styling.

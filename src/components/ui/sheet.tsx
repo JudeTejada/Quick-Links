@@ -1,7 +1,7 @@
 'use client';
 
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog';
-import { XIcon } from 'lucide-react';
+import XIcon from 'lucide-react/dist/esm/icons/x';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -49,6 +49,7 @@ function SheetViewport({
         side === 'left' && 'flex justify-start',
         side === 'right' && 'flex justify-end',
         inset && 'sm:p-4',
+        className,
       )}
       data-slot="sheet-viewport"
       {...props}

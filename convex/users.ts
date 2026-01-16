@@ -1,25 +1,20 @@
-import { mutation } from './_generated/server';
-import { v } from 'convex/values';
+import { query } from './_generated/server';
+import { getAuthUserId } from '@convex-dev/auth/server';
 
-export const upsertByEmail = mutation({
-  args: {
-    email: v.string(),
-  },
-  handler: async (ctx, { email }) => {
-    const existing = await ctx.db
-      .query('users')
-      .withIndex('by_email', (q) => q.eq('email', email))
-      .unique();
+export const getCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
 
-    if (existing) {
-      return { userId: existing._id, email: existing.email };
-    }
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
 
-    const userId = await ctx.db.insert('users', {
-      email,
-      createdAt: Date.now(),
-    });
-
-    return { userId, email };
+    return {
+      id: user._id,
+      email: user.email ?? null,
+      name: user.name ?? null,
+      image: user.image ?? null,
+    };
   },
 });

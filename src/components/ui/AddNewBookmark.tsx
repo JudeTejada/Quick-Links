@@ -1,16 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useMutation } from 'convex/react';
+import { useEffect, useRef, useState } from 'react';
+import { useConvexAuth, useMutation } from 'convex/react';
 
 import { api } from '../../../convex/_generated/api';
 import { notify } from '../../lib/notify';
-import { useAuth } from '../auth';
 import type { CategoryId } from '../../types';
 import { Button } from './button';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { QuickLinksInput } from './QuickLinksInput';
 
 export function CreateBookmark({ categoryId }: { categoryId: CategoryId }) {
-  const { user } = useAuth();
+  const { isAuthenticated } = useConvexAuth();
   const createLink = useMutation(api.links.create);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -22,13 +21,12 @@ export function CreateBookmark({ categoryId }: { categoryId: CategoryId }) {
   }, [isOpen]);
 
   const handleEnter = async (text: string) => {
-    if (!user) return;
+    if (!isAuthenticated) return;
 
     try {
       await createLink({
         url: text,
         categoryId,
-        userId: user.id,
       });
       inputRef.current?.blur();
       setIsOpen(false);
@@ -36,7 +34,7 @@ export function CreateBookmark({ categoryId }: { categoryId: CategoryId }) {
       notify({
         status: 'danger',
         title: 'Error!',
-        description: 'failed to add a new bookmark',
+        description: error instanceof Error ? error.message : 'Failed to add a new bookmark.',
       });
     }
   };

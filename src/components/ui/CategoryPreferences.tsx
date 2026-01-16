@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Ellipsis, Link2, Trash2 } from 'lucide-react';
-import { useMutation } from 'convex/react';
+import { useState } from 'react';
+import Ellipsis from 'lucide-react/dist/esm/icons/ellipsis';
+import Link2 from 'lucide-react/dist/esm/icons/link-2';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import { useConvexAuth, useMutation } from 'convex/react';
 
 import { api } from '../../../convex/_generated/api';
 import type { BookmarkList, CategoryId } from '../../types';
-import { useAuth } from '../auth';
 import { Button } from './button';
 import {
   AlertDialog,
@@ -24,19 +25,18 @@ export function CategoryPreferences(props: {
   onToggleLinksEdit: (value: boolean) => void;
   links: BookmarkList;
 }) {
-  const { user } = useAuth();
+  const { isAuthenticated } = useConvexAuth();
   const removeCategory = useMutation(api.bookmarks.remove);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
-    if (!user) return;
+    if (!isAuthenticated) return;
 
     setIsLoading(true);
     try {
-      await removeCategory({ userId: user.id, categoryId: props.categoryId });
+      await removeCategory({ categoryId: props.categoryId });
     } catch (error) {
-       
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -81,10 +81,10 @@ export function CategoryPreferences(props: {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Are you sure you want to delete "{props.categoryTitle}"?
+            Are you sure you want to delete &quot;{props.categoryTitle}&quot;?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Deleting this means you won't be able to recover the content and its links.
+            Deleting this means you won&apos;t be able to recover the content and its links.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

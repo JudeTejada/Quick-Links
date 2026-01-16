@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 
 import { Field, FieldError, FieldLabel } from './field';
 import { Input } from './input';
@@ -28,60 +29,65 @@ const validateInput = (text: string, type: InputType) => {
 
 const formatValue = (text: string, type: InputType) => {
   if (type === 'bookmark') {
-    const cleaned = text.replace(/^https?:\/\//, '');
-    return `https://${cleaned}`;
+    const cleaned = text.replace(/^(https?:\/\/)+/i, '');
+    return cleaned ? `https://${cleaned}` : 'https://';
   }
 
   return text;
 };
 
-export function QuickLinksInput(props: QuickLinksInputProps) {
-  const [text, setText] = useState(props.text || '');
+export function QuickLinksInput({
+  type,
+  errorText,
+  inputType = 'text',
+  label,
+  text: initialText,
+  placeholder,
+  id,
+  onFocus,
+  onBlur,
+  onSuccessHandler,
+  inputRef,
+}: QuickLinksInputProps) {
+  const [text, setText] = useState(initialText || (type === 'bookmark' ? 'https://' : ''));
   const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    if (props.type === 'bookmark' && !props.text) {
-      setText('https://');
-    }
-  }, [props.type, props.text]);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Enter') return;
 
-    const shouldError = validateInput(text, props.type);
+    const normalized = formatValue(text, type);
+    const shouldError = validateInput(normalized, type);
     if (shouldError) {
       setIsError(true);
       return;
     }
 
-    props.onSuccessHandler(text);
+    onSuccessHandler(normalized);
   };
 
-  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
     setIsError(false);
     const inputValue = event.target.value;
-    const formatted = formatValue(inputValue, props.type);
+    const formatted = formatValue(inputValue, type);
     setText(formatted);
   };
 
   return (
     <Field>
-      {props.label ? (
-        <FieldLabel htmlFor={props.id ?? props.label}>{props.label}</FieldLabel>
-      ) : null}
+      {label ? <FieldLabel htmlFor={id ?? label}>{label}</FieldLabel> : null}
       <Input
-        ref={props.inputRef}
-        id={props.id ?? props.label}
-        placeholder={props.placeholder}
-        type={props.inputType || 'text'}
+        ref={inputRef}
+        id={id ?? label}
+        placeholder={placeholder}
+        type={inputType}
         value={text}
         onChange={handleInput}
         onKeyDown={handleKeyDown}
-        onFocus={props.onFocus}
-        onBlur={props.onBlur}
+        onFocus={onFocus}
+        onBlur={onBlur}
         aria-invalid={isError}
       />
-      {isError ? <FieldError>{props.errorText}</FieldError> : null}
+      {isError ? <FieldError>{errorText}</FieldError> : null}
     </Field>
   );
 }

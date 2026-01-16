@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as bookmarks from "../bookmarks.js";
+import type * as http from "../http.js";
 import type * as links from "../links.js";
 import type * as users from "../users.js";
 
@@ -19,7 +21,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   bookmarks: typeof bookmarks;
+  http: typeof http;
   links: typeof links;
   users: typeof users;
 }>;

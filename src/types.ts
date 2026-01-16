@@ -9,6 +9,9 @@ export type Bookmark = {
   url: string;
   categoryId: CategoryId;
   userId: UserId;
+  createdAt: number;
+  sortIndex?: number;
+  updatedAt?: number;
 };
 
 export type BookmarkList = Bookmark[];
@@ -17,6 +20,9 @@ export type BookmarkCategory = {
   _id: CategoryId;
   title: string;
   userId: UserId;
+  createdAt: number;
+  sortIndex?: number;
+  updatedAt?: number;
 };
 
 export type BookmarkGroup = BookmarkCategory & {

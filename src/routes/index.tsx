@@ -1,41 +1,67 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useConvexAuth, useQuery } from 'convex/react';
+import { useAuthActions } from '@convex-dev/auth/react';
 
-import { useAuth } from '../components/auth';
-import { BookmarkProvider } from '../context/BookmarkProvider';
-import { BookmarkCategories } from '../components/ui';
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import { Button } from '../components/ui/button';
+import { BookmarkCategories } from '@/components/ui/BookmarkCategories';
+import { BookmarkLoader } from '@/components/ui/BookmarkLoader';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { api } from '../../convex/_generated/api';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
 function Home() {
-  const { user, isLoading, signOut } = useAuth();
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const { signOut } = useAuthActions();
+  const user = useQuery(api.users.getCurrentUser, isAuthenticated ? {} : 'skip');
   const navigate = useNavigate();
+  const isCheckingSession = isLoading || (isAuthenticated && user === undefined);
+  const isRedirecting = !isLoading && !isAuthenticated;
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !isAuthenticated) {
       navigate({ to: '/login' });
     }
-  }, [isLoading, navigate, user]);
+  }, [isAuthenticated, isLoading, navigate]);
 
-  if (isLoading || !user) return null;
+  if (isCheckingSession || isRedirecting) {
+    return (
+      <div className="min-h-screen p-6">
+        <div className="mx-auto max-w-5xl rounded-2xl bg-white p-6 md:p-14">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-56 rounded-md" />
+              <Skeleton className="h-4 w-32 rounded-md" />
+            </div>
+            <Skeleton className="h-9 w-24 rounded-md" />
+          </div>
+          <div className="mt-10">
+            <BookmarkLoader />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen  p-6">
-      <div className="mx-auto max-w-5xl rounded-2xl bg-white p-6  md:p-14">
-        <div className="flex flex-wrap items-start justify-between gap-6">
+    <div className="min-h-screen p-6">
+      <div className="mx-auto max-w-5xl rounded-2xl bg-white p-6 md:p-14">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl text-slate-900 md:text-4xl">Quick Links</h1>
-            <p className="mt-1 text-sm text-slate-500">{user.email}</p>
+            <h1 className="font-display font-bold text-3xl text-slate-900 md:text-4xl">
+              Quick Links
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">{user?.email ?? 'Signed in'}</p>
           </div>
           <Button
             type="button"
             size="sm"
             className="border-transparent bg-[#0EA5B7] text-white shadow-sm hover:bg-[#0B8EA0]"
-            onClick={signOut}
+            onClick={() => void signOut()}
           >
             Sign out
           </Button>
@@ -59,10 +85,8 @@ function BookmarkContent() {
   }
 
   return (
-    <div className="mt-10 flex flex-col items-start">
-      <BookmarkProvider>
-        <BookmarkCategories />
-      </BookmarkProvider>
+    <div className="mt-10 w-full">
+      <BookmarkCategories />
     </div>
   );
 }

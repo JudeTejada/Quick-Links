@@ -1,33 +1,38 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { useAuthActions } from '@convex-dev/auth/react';
 
-import { notify } from '../../lib/notify';
-import { useAuth } from './AuthProvider';
-import { Button } from '../ui/button';
-import { Field, FieldLabel } from '../ui/field';
-import { Input } from '../ui/input';
+import { notify } from '@/lib/notify';
+import { Button } from '@/components/ui/button';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 
 export function SignIn() {
-  const { signIn } = useAuth();
+  const { signIn } = useAuthActions();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     try {
-      await signIn(email);
+      const formData = new FormData(event.currentTarget);
+      formData.set('redirectTo', '/');
+      const result = await signIn('resend', formData);
 
       notify({
         status: 'success',
         title: 'Success',
-        description: 'You are now signed in.',
+        description: result.signingIn
+          ? 'You are now signed in.'
+          : 'Check your email for a magic link to finish signing in.',
       });
       setEmail('');
-    } catch (error: any) {
+    } catch (error) {
       notify({
         status: 'danger',
         title: 'Something went wrong',
-        description: error?.message || 'Unable to sign in.',
+        description: error instanceof Error ? error.message : 'Unable to send a magic link.',
       });
     } finally {
       setIsLoading(false);
@@ -40,13 +45,14 @@ export function SignIn() {
         <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5">
           <div className="text-center">
             <h1 className="font-display text-3xl text-slate-900">Welcome</h1>
-            <p className="mt-2 text-sm text-slate-500">Easily sign in with using a magic link.</p>
+            <p className="mt-2 text-sm text-slate-500">Easily sign in using a magic link.</p>
           </div>
           <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
             <Field>
               <FieldLabel htmlFor="email">Email address</FieldLabel>
               <Input
                 id="email"
+                name="email"
                 placeholder="johndoe@gmail.com"
                 type="email"
                 value={email}
