@@ -5,8 +5,8 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
 import { useConvexAuth, useMutation } from 'convex/react';
 
 import { api } from '../../../convex/_generated/api';
-import type { BookmarkList, CategoryId } from '../../types';
-import { Button } from './button';
+import type { BookmarkList, CategoryId } from '@/types';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -15,8 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogClose,
-} from './alert-dialog';
-import { Menu, MenuItem, MenuPopup, MenuTrigger } from './menu';
+} from '@/components/ui/alert-dialog';
+import { Menu, MenuItem, MenuPopup, MenuTrigger } from '@/components/ui/menu';
 
 export function CategoryPreferences(props: {
   categoryId: CategoryId;

@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useConvexAuth, useMutation } from 'convex/react';
 
 import { api } from '../../../convex/_generated/api';
-import { Button } from './button';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
-import { QuickLinksInput } from './QuickLinksInput';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { QuickLinksInput } from '@/components/bookmarks/QuickLinksInput';
 
 export function CreateNewCategory() {
   const { isAuthenticated } = useConvexAuth();

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { ChangeEvent, KeyboardEvent, RefObject } from 'react';
 
-import { Field, FieldError, FieldLabel } from './field';
-import { Input } from './input';
-import { isUrl } from '../../util';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { isUrl } from '@/util';
 
 type InputType = 'category' | 'bookmark';
+type InputRef = RefObject<HTMLInputElement | null>;
 
 interface QuickLinksInputProps {
   type: InputType;
@@ -18,7 +19,7 @@ interface QuickLinksInputProps {
   onFocus?: () => void;
   onBlur?: () => void;
   onSuccessHandler: (text: string) => void;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: InputRef;
 }
 
 const validateInput = (text: string, type: InputType) => {

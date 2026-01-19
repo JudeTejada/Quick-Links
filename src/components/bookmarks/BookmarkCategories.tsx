@@ -25,16 +25,16 @@ import { useConvexAuth, useMutation } from 'convex/react';
 
 import { useBookmark } from '@/hooks/useBookmark';
 import { LinksList } from './LinksList';
-import { CreateNewCategory } from './AddNewCategory';
-import { CategoryPreferences } from './CategoryPreferences';
+import { CreateNewCategory } from '@/components/categories/AddNewCategory';
+import { CategoryPreferences } from '@/components/categories/CategoryPreferences';
 import { BookmarkLoader } from './BookmarkLoader';
 import type { BookmarkId, BookmarkList, CategoriesBookmark, CategoryId } from '../../types';
-import { notify } from '../../lib/notify';
+import { notify } from '@/lib/notify';
 import { api } from '../../../convex/_generated/api';
-import { Button } from './button';
-import { Input } from './input';
-import { cn } from '../../lib/utils';
-import { getCategoryDragId } from '../../lib/drag';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { getCategoryDragId } from '@/lib/drag';
 
 const normalizeCategories = (categories: CategoriesBookmark) =>
   [...categories]
@@ -469,9 +469,9 @@ function CategoryItem(props: CategoryItemProps) {
         transition,
       }}
       className={cn(
-        'group relative rounded-2xl  px-3 py-3 transition-[background-color] duration-200 hover:bg-slate-50',
-        props.isDropTarget && 'bg-sky-50/70',
-        isDragging && 'opacity-70',
+        'group relative rounded-2xl px-3 py-3 transition-[background-color,transform,box-shadow] duration-200 hover:bg-slate-50',
+        props.isDropTarget && 'bg-sky-50/70 ring-2 ring-sky-300/50 ring-offset-2',
+        isDragging && 'opacity-40 scale-95',
       )}
     >
       <div className="flex items-center justify-between gap-3">
@@ -555,8 +555,8 @@ function CategoryItem(props: CategoryItemProps) {
 
 function CategoryGhost({ title }: { title: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-white/95 px-3 py-2.5">
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-100 text-slate-400">
+    <div className="flex items-center gap-2 rounded-2xl border border-slate-200/60 bg-white/95 px-3 py-2.5 shadow-xl backdrop-blur-sm transition-transform duration-200">
+      <span className="grid h-7 w-7 cursor-grabbing place-items-center rounded-full bg-slate-100 text-slate-500 shadow-sm">
         <GripVertical size={14} />
       </span>
       <span className="text-base font-semibold text-slate-800">{title || 'Untitled'}</span>
@@ -566,11 +566,10 @@ function CategoryGhost({ title }: { title: string }) {
 
 function LinkGhost({ url }: { url: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-full bg-white/95 px-2.5 py-1.5">
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+    <div className="grid h-8 w-8 place-items-center rounded-full border border-slate-200/60 bg-white/95 shadow-xl backdrop-blur-sm transition-transform duration-200">
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-900 text-xs font-semibold text-white shadow-sm">
         {url ? url.slice(0, 2).toUpperCase() : 'QL'}
       </span>
-      <span className="max-w-[200px] truncate text-sm text-slate-700">{url || 'Quick Link'}</span>
     </div>
   );
 }

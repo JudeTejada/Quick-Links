@@ -5,13 +5,13 @@ import { useDndContext } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-import type { Bookmark, CategoryId } from '../../types';
-import { removeHttp } from '../../util';
+import type { Bookmark, CategoryId } from '@/types';
+import { removeHttp } from '@/util';
 import { CreateBookmark } from './AddNewBookmark';
 import { api } from '../../../convex/_generated/api';
-import { Button } from './button';
-import { cn } from '../../lib/utils';
-import { getLinkDragId } from '../../lib/drag';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { getLinkDragId } from '@/lib/drag';
 
 interface LinkListProps {
   list: Bookmark[];
@@ -85,15 +85,15 @@ function BookmarkLink(props: BookmarkLinkProps) {
         transition,
       }}
       className={cn(
-        'group relative rounded-full bg-slate-50/70 p-0.5 transition-[background-color] duration-200',
-        showInsert && 'bg-sky-50',
-        isDragging && 'opacity-60',
+        'group relative rounded-full bg-slate-50/70 p-0.5 transition-[background-color,transform,opacity] duration-200',
+        showInsert && 'bg-sky-100 ring-2 ring-sky-300/50',
+        isDragging && 'opacity-30 scale-95',
       )}
     >
       <div
         className={cn(
-          'pointer-events-none absolute -top-2 left-1/2 h-1 w-12 -translate-x-1/2 rounded-full bg-sky-300/0 transition-opacity duration-200',
-          showInsert && 'bg-sky-300/80',
+          'pointer-events-none absolute -top-2 left-1/2 h-1 w-12 -translate-x-1/2 rounded-full bg-sky-400/0 transition-all duration-200',
+          showInsert && 'bg-sky-400/90 scale-110',
         )}
       />
       <div
