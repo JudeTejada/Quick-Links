@@ -22,7 +22,9 @@ const config = defineConfig({
   },
   plugins: [
     !isVitest && !isPlaywright && devtools(),
-    !isVitest && nitro(),
+    !isVitest && nitro({
+      preset: 'vercel',
+    }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
