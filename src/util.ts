@@ -1,7 +1,7 @@
-export const isUrl = (string: string): boolean => {
+export const isUrl = (value: string): boolean => {
   try {
-    return Boolean(new URL(string));
-  } catch (e) {
+    return Boolean(new URL(value));
+  } catch {
     return false;
   }
 };

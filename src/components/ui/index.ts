@@ -1,4 +1,4 @@
-export * from './AddNewBookmark';
-export * from './BookmarkCategories';
-export * from './AddNewCategory';
-export * from './Input';
+export { BookmarkCategories } from './BookmarkCategories';
+export { CreateNewCategory } from './AddNewCategory';
+export { CreateBookmark } from './AddNewBookmark';
+export { BookmarkLoader } from './BookmarkLoader';

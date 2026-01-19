@@ -1,23 +1,32 @@
-import { Database } from './types/supabase';
+import type { Id } from '../convex/_generated/dataModel';
 
-type Bookmark = Database['public']['Tables']['links']['Row'];
+export type UserId = Id<'users'>;
+export type BookmarkId = Id<'links'>;
+export type CategoryId = Id<'bookmarks'>;
 
-type BookmarkList = Bookmark[];
-type BookmarkCategory = Database['public']['Tables']['bookmarks']['Row'];
+export type Bookmark = {
+  _id: BookmarkId;
+  url: string;
+  categoryId: CategoryId;
+  userId: UserId;
+  createdAt: number;
+  sortIndex?: number;
+  updatedAt?: number;
+};
 
-type BookmarkGroup = Database['public']['Tables']['bookmarks']['Row'] & {
+export type BookmarkList = Bookmark[];
+
+export type BookmarkCategory = {
+  _id: CategoryId;
+  title: string;
+  userId: UserId;
+  createdAt: number;
+  sortIndex?: number;
+  updatedAt?: number;
+};
+
+export type BookmarkGroup = BookmarkCategory & {
   links: BookmarkList;
 };
 
-type AddNewBookmarkGroup = Database['public']['Tables']['bookmarks']['Insert'];
-
-type CategoriesBookmark = BookmarkGroup[];
-
-export type {
-  Bookmark,
-  BookmarkGroup,
-  CategoriesBookmark,
-  BookmarkList,
-  AddNewBookmarkGroup,
-  BookmarkCategory
-};
+export type CategoriesBookmark = BookmarkGroup[];
