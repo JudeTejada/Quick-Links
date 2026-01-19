@@ -1,37 +1,37 @@
-# Dependencies
-node_modules
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-*.log
-
-# OS
-.DS_Store
-
-# Builds
-dist
-dist-ssr
-.output
-.nitro
-.tanstack
-.vinxi
-.wrangler
-
-# Coverage
-coverage
-
-# Env
+# Dependencies
+node_modules
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS
+.DS_Store
+
+# Builds
+dist
+dist-ssr
+.output
+.nitro
+.tanstack
+.vinxi
+.wrangler
+
+# Coverage
+coverage
+
+# Env
+!.env.example
+*.local
+
+# Tooling
+.eslintcache
+
+# Misc
+count.txt
+todos.json
+config.bat
 .env
-.env.*
-!.env.example
-*.local
-
-# Tooling
-.eslintcache
-
-# Misc
-count.txt
-todos.json
